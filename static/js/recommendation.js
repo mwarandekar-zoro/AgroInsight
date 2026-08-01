@@ -1,4 +1,4 @@
-// AgriInsight AI — crop recommendation form
+// AgroInsight AI — crop recommendation form
 
 (function () {
   const form = document.getElementById('recForm');

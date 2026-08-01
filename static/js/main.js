@@ -1,4 +1,4 @@
-// AgriInsight AI — shared front-end behaviour
+// AgroInsight AI — shared front-end behaviour
 
 document.addEventListener('DOMContentLoaded', () => {
   // Reveal feature cards / insight cards as they scroll into view
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeBtn.addEventListener('click', () => {
       const nowLight = !document.documentElement.classList.contains('light-theme');
       try {
-        localStorage.setItem('agriinsight-theme', nowLight ? 'light' : 'dark');
+        localStorage.setItem('agroinsight-theme', nowLight ? 'light' : 'dark');
       } catch (e) { /* localStorage unavailable — theme just won't persist */ }
       // Reload rather than toggle in place: Chart.js reads CSS variables
       // once at chart creation time, so any charts on the page would stay

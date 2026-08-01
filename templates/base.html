@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}AgriInsight AI{% endblock %}</title>
+  <title>{% block title %}AgroInsight AI{% endblock %}</title>
   <meta name="description" content="Smart Agriculture Analytics & Recommendation Platform">
   <script>
     // Runs before paint so there's no flash of the wrong theme.
     (function () {
       try {
-        if (localStorage.getItem('agriinsight-theme') === 'light') {
+        if (localStorage.getItem('agroinsight-theme') === 'light') {
           document.documentElement.classList.add('light-theme');
         }
       } catch (e) { /* localStorage unavailable — default to dark */ }

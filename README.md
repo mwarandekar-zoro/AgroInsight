@@ -1,4 +1,4 @@
-# AgriInsight AI
+# AgroInsight AI
 
 Smart Agriculture Analytics & Recommendation Platform — Flask + SQLite + Chart.js.
 
@@ -11,8 +11,18 @@ python app.py
 
 Visit `http://localhost:5000`.
 
-The SQLite database (`database/agriinsight.db`) is created automatically on
+The SQLite database (`database/agroinsight.db`) is created automatically on
 first run from `database/schema.sql` — nothing to set up manually.
+
+**Chart.js is bundled locally**, not loaded from a CDN — it lives at
+`static/js/chart.umd.js` and is served by Flask like any other static
+file. This was originally pulled from `cdnjs.cloudflare.com` on every
+page load; on networks that block that CDN (some college/hostel Wi-Fi,
+some antivirus/firewall setups) the script silently failed to load, which
+crashed every other script on the page (`Chart is not defined`) — killing
+the KPIs and all 13 charts with no visible error unless you opened
+DevTools. Bundling it locally removes that failure mode entirely and also
+means the dashboard still works with no internet connection at all.
 
 ## What's working right now
 
@@ -22,29 +32,44 @@ first run from `database/schema.sql` — nothing to set up manually.
 - **Register / Login** (`/register`, `/login`) — real accounts, hashed
   passwords (Werkzeug), session-based auth. Successful login redirects to
   `/dashboard`.
-- **Dashboard shell** (`/dashboard`) — sidebar, topbar, filter bar, 4 KPI
-  cards, and 4 live Chart.js charts (yield trend, top crops, rainfall vs
-  yield, soil NPK radar). Charts currently run on **sample data** — see
-  next steps.
+- **Dashboard** (`/dashboard`) — sidebar, topbar, filter bar, 4 KPI cards,
+  and 13 live Chart.js charts across 4 sections (Yield, Weather, Soil &
+  Crop, Geographic Analysis) — see the "Dashboard charts" section below.
+  Everything is queried live from `crop_data`; nothing is sample data.
 
 ## Dataset
 
-`dataset/crop_dataset.csv` — 50,765 rows, 1966–2017, 20 states, 311
-districts, **4 crops: rice, maize, chickpea, cotton**. Columns: yield,
-area, N/P/K requirement, temperature, humidity, pH, rainfall, wind speed,
-solar radiation.
+The CSV must live at **exactly** this path and filename (case-sensitive):
 
-Load it into SQLite (safe to re-run — clears and reloads `crop_data` each
-time):
+```
+dataset/crop_dataset.csv
+```
+
+50,765 rows, 1966–2017, 20 states, 311 districts, **4 crops: rice, maize,
+chickpea, cotton**. Columns: yield, area, N/P/K requirement, temperature,
+humidity, pH, rainfall, wind speed, solar radiation. If your raw file has
+a different name (e.g. `Custom_Crops_yield_Historical_Dataset.csv`), copy
+it into `dataset/` and rename it to `crop_dataset.csv` — the loader looks
+for that exact filename and won't find it otherwise (this fails silently
+with just a log warning, not a crash, so it's easy to miss).
+
+**Auto-loads on startup, no manual step needed:** `database/db.py` checks
+`crop_data` on every app start, and if it's empty, loads the CSV
+automatically (uses the same cleaning logic as the command below). You'll
+see this in the terminal on a first run / after deleting the `.db` file:
+
+```
+crop_data table is empty — loading dataset from CSV (first run)...
+Loaded 50,765 rows -> 50,765 after cleaning (0 dropped)
+crop_data now has 50,765 rows
+```
+
+You can still run the loader manually any time (e.g. after editing the
+CSV) — it's safe to re-run, and clears + reloads `crop_data` each time:
 
 ```bash
 python -m ml.data_loader
 ```
-
-This runs automatically once `database/agriinsight.db` exists and has the
-`crop_data` table populated — if you delete the `.db` file, re-run the
-loader before starting the app, since `register_db()` only creates empty
-tables, it doesn't load data.
 
 A `v_crop_year_state` SQL view is also created for fast aggregate queries
 (avg yield/rainfall/temp/humidity/pH by year+state+crop) — most dashboard
@@ -296,6 +321,13 @@ the seam to plug in a real LLM later); and the recommendation model's
 100% accuracy is a known, documented artifact of this dataset's fixed
 per-crop climate profiles, not a modeling bug — worth being ready to
 explain in a defense/demo.
+
+**Sidebar nav note:** "Analytics" in the sidebar is an alias for
+`/dashboard` on every page (that's intentional — there's no separate
+Analytics page, the Dashboard *is* the analytics view). "Settings" and
+the Dashboard page's "Export report" button are still dead placeholders
+(`href="#"`) from the original spec — never built, not a bug. Real
+exports exist on the `/reports` page.
 
 ## Structure
 

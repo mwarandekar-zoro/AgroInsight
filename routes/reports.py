@@ -1,5 +1,5 @@
 """
-AgriInsight AI — reports
+AgroInsight AI — reports
 
 CSV/Excel exports give the raw filtered rows (people who want the data
 want the data). The PDF export is a formatted summary instead of a raw
@@ -68,7 +68,7 @@ def export_csv():
     df = _filtered_df(get_db())
     buffer = io.StringIO()
     df.to_csv(buffer, index=False, header=[COLUMN_LABELS[c] for c in EXPORT_COLUMNS])
-    filename = f"agriinsight_export_{datetime.now().strftime('%Y%m%d')}.csv"
+    filename = f"agroinsight_export_{datetime.now().strftime('%Y%m%d')}.csv"
     return Response(
         buffer.getvalue(),
         mimetype="text/csv",
@@ -90,7 +90,7 @@ def export_excel():
             width = max(12, min(30, int(df[col].astype(str).str.len().max() or 10) + 2))
             sheet.column_dimensions[chr(64 + i) if i <= 26 else "A"].width = width
     buffer.seek(0)
-    filename = f"agriinsight_export_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    filename = f"agroinsight_export_{datetime.now().strftime('%Y%m%d')}.xlsx"
     return send_file(
         buffer,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -132,7 +132,7 @@ def export_pdf():
     styles = getSampleStyleSheet()
     story = []
 
-    story.append(Paragraph("AgriInsight AI — Crop Report", styles["Title"]))
+    story.append(Paragraph("AgroInsight AI — Crop Report", styles["Title"]))
     story.append(Paragraph(
         f"Generated {datetime.now().strftime('%d %b %Y, %H:%M')} &nbsp;·&nbsp; Filters: {_filter_summary_text()}",
         styles["Normal"],
@@ -188,5 +188,5 @@ def export_pdf():
 
     doc.build(story)
     buffer.seek(0)
-    filename = f"agriinsight_report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    filename = f"agroinsight_report_{datetime.now().strftime('%Y%m%d')}.pdf"
     return send_file(buffer, mimetype="application/pdf", as_attachment=True, download_name=filename)

@@ -1,5 +1,5 @@
 """
-AgriInsight AI — recommendation inference
+AgroInsight AI — recommendation inference
 
 Loads models/crop_model.pkl once (lazily, cached in-process) and exposes
 predict(input_dict) -> full recommendation payload. No database access

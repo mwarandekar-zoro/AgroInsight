@@ -1,4 +1,4 @@
-// AgriInsight AI — assistant chat
+// AgroInsight AI — assistant chat
 
 (function () {
   const form = document.getElementById('chatForm');

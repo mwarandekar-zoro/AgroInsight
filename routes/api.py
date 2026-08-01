@@ -1,5 +1,5 @@
 """
-AgriInsight AI — dashboard API
+AgroInsight AI — dashboard API
 
 All endpoints accept optional query params: year, crop, state, district.
 Omit a param (or pass "all") to not filter on it. Every route queries

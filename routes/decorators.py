@@ -1,5 +1,5 @@
 """
-AgriInsight AI — auth decorators
+AgroInsight AI — auth decorators
 
 Split into two because a redirect makes sense for a page request but not
 for a fetch() call from JS — an API 401 lets the frontend handle it

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — AgriInsight AI{% endblock %}
+{% block title %}Dashboard — AgroInsight AI{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
@@ -7,10 +7,10 @@
 {% block body %}
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><div class="brand-mark">🌱</div> AgriInsight</div>
+    <div class="brand"><div class="brand-mark">🌱</div> AgroInsight</div>
     <nav class="sidebar-nav">
       <a class="sidebar-link active" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
-      <a class="sidebar-link" href="#"><span class="ic">📈</span> Analytics</a>
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
       <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
       <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
       <a class="sidebar-link" href="/assistant"><span class="ic">🤖</span> AI Assistant</a>
@@ -247,6 +247,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}

@@ -1,5 +1,5 @@
 """
-AgriInsight AI — chatbot response builders
+AgroInsight AI — chatbot response builders
 
 Every function here queries crop_data directly and returns
 (reply_text, redirect_url | None). Nothing is invented — if the data

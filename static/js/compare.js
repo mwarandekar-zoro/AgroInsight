@@ -1,4 +1,4 @@
-// AgriInsight AI — crop comparison page
+// AgroInsight AI — crop comparison page
 
 (function () {
   const cropASel = document.getElementById('cropA');

@@ -1,4 +1,4 @@
--- AgriInsight AI — schema (aligned to Custom_Crops_yield_Historical_Dataset.csv)
+-- AgroInsight AI — schema (aligned to Custom_Crops_yield_Historical_Dataset.csv)
 
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

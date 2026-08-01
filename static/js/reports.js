@@ -1,4 +1,4 @@
-// AgriInsight AI — reports page
+// AgroInsight AI — reports page
 
 (function () {
   const yearSel = document.getElementById('filterYear');

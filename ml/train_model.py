@@ -1,5 +1,5 @@
 """
-AgriInsight AI — model training
+AgroInsight AI — model training
 
 Trains two models off crop_data:
   1. RandomForestClassifier  -> predicts crop from N/P/K + climate
@@ -33,7 +33,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DB_PATH = os.path.join(BASE_DIR, "database", "agriinsight.db")
+DB_PATH = os.path.join(BASE_DIR, "database", "agroinsight.db")
 MODEL_PATH = os.path.join(BASE_DIR, "models", "crop_model.pkl")
 
 FEATURES = [

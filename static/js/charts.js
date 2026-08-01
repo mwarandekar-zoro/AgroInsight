@@ -1,4 +1,4 @@
-// AgriInsight AI — dashboard charts (live data)
+// AgroInsight AI — dashboard charts (live data)
 // Every chart + KPI here is fetched from /api/... and re-fetched whenever
 // a filter changes. No sample/hardcoded data.
 

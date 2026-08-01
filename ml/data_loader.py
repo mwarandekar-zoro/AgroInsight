@@ -1,5 +1,5 @@
 """
-AgriInsight AI — dataset loader
+AgroInsight AI — dataset loader
 
 Reads dataset/crop_dataset.csv, cleans it, and loads it into the crop_data
 table. Safe to re-run: it clears crop_data first so you never end up with
@@ -16,7 +16,7 @@ import pandas as pd
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 CSV_PATH = os.path.join(BASE_DIR, "dataset", "crop_dataset.csv")
-DB_PATH = os.path.join(BASE_DIR, "database", "agriinsight.db")
+DB_PATH = os.path.join(BASE_DIR, "database", "agroinsight.db")
 SCHEMA_PATH = os.path.join(BASE_DIR, "database", "schema.sql")
 
 COLUMN_MAP = {

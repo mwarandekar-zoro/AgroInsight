@@ -1,5 +1,5 @@
 """
-AgriInsight AI — chatbot query understanding
+AgroInsight AI — chatbot query understanding
 
 Rule-based on purpose: fast, free, and fully deterministic, so answers are
 always grounded in what's actually in crop_data — no hallucination risk.
