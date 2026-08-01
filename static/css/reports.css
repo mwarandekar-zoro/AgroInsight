@@ -1,0 +1,30 @@
+/* =========================================================
+   AgriInsight AI — Reports
+   ========================================================= */
+
+.export-panel { padding: 26px; }
+.export-panel h3 { font-size: 16px; margin-bottom: 8px; }
+.export-sub { font-size: 13.5px; margin-bottom: 20px; max-width: 560px; }
+
+.export-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.export-btn {
+  flex: 1;
+  min-width: 180px;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.export-icon { font-size: 22px; }
+.export-tag {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 500;
+  text-transform: none;
+}
+.btn-primary .export-tag { color: rgba(6,23,13,0.65); }
+
+@media (max-width: 700px) {
+  .export-actions { flex-direction: column; }
+}

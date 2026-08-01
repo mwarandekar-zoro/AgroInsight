@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant — AgriInsight AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">🌱</div> AgriInsight</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
+      <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
+      <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
+      <a class="sidebar-link active" href="{{ url_for('assistant.assistant_home') }}"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link" href="/reports"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">{{ session.user_name }}</strong><br><a href="{{ url_for("auth.logout") }}" style="color:var(--danger); font-size:12px;">Log out</a></div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search-box">🔍 Search crops, states, districts…</div>
+      <div class="topbar-actions">
+        <div class="icon-btn" title="Toggle theme">🌙</div>
+        <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
+        <div class="avatar">{{ session.user_name[0]|upper }}</div>
+      </div>
+    </header>
+
+    <main class="main-content assistant-main">
+      <div class="page-head">
+        <div>
+          <h1>AI Assistant</h1>
+          <p class="sub">Ask about crops, states, or yields — answers are grounded in the live dataset, not made up.</p>
+        </div>
+      </div>
+
+      <div class="card chat-panel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg bot">
+            <div class="chat-avatar bot">🤖</div>
+            <div class="chat-bubble">
+              Hi! Ask me something like <em>"best crop for Punjab"</em> or <em>"compare rice and cotton"</em>.
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-suggestions" id="chatSuggestions">
+          {% for ex in examples %}
+          <button type="button" class="chat-chip" data-prompt="{{ ex }}">{{ ex }}</button>
+          {% endfor %}
+        </div>
+
+        <form class="chat-input-row" id="chatForm">
+          <input type="text" id="chatInput" placeholder="Ask about a crop, state, or comparison…" maxlength="300" autocomplete="off">
+          <button type="submit" class="btn btn-primary btn-sm" id="chatSend">Send</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>window.CURRENT_USER_INITIAL = "{{ session.user_name[0]|upper }}";</script>
+<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+{% endblock %}

@@ -57,7 +57,7 @@
   padding: 0 28px;
   position: sticky;
   top: 0;
-  background: rgba(11,18,32,0.75);
+  background: var(--nav-blur-bg);
   backdrop-filter: blur(14px);
   z-index: 20;
 }
@@ -191,6 +191,50 @@
 .chart-card-actions { display: flex; gap: 6px; }
 .chart-card-actions .icon-btn { width: 30px; height: 30px; font-size: 12px; }
 .chart-wrap { position: relative; height: 260px; }
+.chart-wrap.tall { height: 340px; }
+
+.chart-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  margin: 30px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.chart-section-title:first-of-type { margin-top: 4px; }
+
+.heatmap-note { font-size: 12.5px; margin-bottom: 16px; }
+.heatmap-wrap { overflow-x: auto; }
+.heatmap-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.heatmap-table th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.heatmap-table th.crop-col { text-align: center; }
+.heatmap-table td { padding: 4px; white-space: nowrap; }
+.heatmap-table .state-label { color: var(--text-muted); padding-right: 14px; font-family: var(--font-mono); font-size: 12px; }
+.heatmap-cell {
+  width: 90px;
+  height: 38px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: default;
+  transition: transform 0.1s ease;
+}
+.heatmap-cell:hover { transform: scale(1.06); }
 
 @media (max-width: 1100px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }

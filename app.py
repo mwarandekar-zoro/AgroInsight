@@ -8,6 +8,8 @@ from routes.dashboard import dashboard_bp
 from routes.api import api_bp
 from routes.recommendation import recommendation_bp
 from routes.compare import compare_bp
+from routes.chatbot import assistant_bp
+from routes.reports import reports_bp
 
 
 def create_app():
@@ -22,6 +24,8 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(recommendation_bp)
     app.register_blueprint(compare_bp)
+    app.register_blueprint(assistant_bp)
+    app.register_blueprint(reports_bp)
 
     return app
 

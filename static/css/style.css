@@ -39,7 +39,49 @@
   --max-w: 1240px;
 
   --shadow-card: 0 1px 0 rgba(255,255,255,0.03) inset, 0 20px 40px -20px rgba(0,0,0,0.6);
+  --nav-blur-bg: rgba(11, 18, 32, 0.72);
 }
+
+/* =========================================================
+   LIGHT THEME
+   Same structure as :root above — only values change. Text-facing
+   accent colors (--primary etc.) are darkened a step from the dark-theme
+   versions so they still clear AA contrast against a white background;
+   button backgrounds keep the brand hue since those aren't text-on-bg.
+   ========================================================= */
+html.light-theme {
+  --bg: #F5F7F6;
+  --bg-raised: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #F0F3F1;
+  --border: rgba(15, 23, 20, 0.08);
+  --border-strong: rgba(15, 23, 20, 0.16);
+
+  --primary: #16A34A;
+  --primary-dim: #15803D;
+  --primary-glow: rgba(22, 163, 74, 0.22);
+  --accent: #2563EB;
+  --accent-glow: rgba(37, 99, 235, 0.2);
+  --warning: #B45309;
+  --danger: #DC2626;
+
+  --text: #10151C;
+  --text-muted: #4B5768;
+  --text-faint: #8892A0;
+
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.6) inset, 0 16px 34px -20px rgba(15,23,20,0.16);
+  --nav-blur-bg: rgba(255, 255, 255, 0.75);
+}
+
+html.light-theme body {
+  background-image:
+    radial-gradient(1100px 600px at 85% -10%, rgba(34,197,94,0.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, rgba(59,130,246,0.05), transparent 55%);
+}
+
+/* button text on the primary gradient stays dark in both themes since the
+   gradient itself doesn't change — only called out here for clarity */
+html.light-theme .btn-primary { color: #06170D; }
 
 * { box-sizing: border-box; }
 
@@ -124,6 +166,18 @@ img { max-width: 100%; display: block; }
 
 .btn-sm { padding: 9px 16px; font-size: 13px; }
 
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s ease;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.07); }
+
 /* ---------- Glass card ---------- */
 .glass {
   background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
@@ -161,7 +215,7 @@ img { max-width: 100%; display: block; }
   align-items: center;
   justify-content: space-between;
   padding: 20px 32px;
-  background: rgba(11, 18, 32, 0.72);
+  background: var(--nav-blur-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);

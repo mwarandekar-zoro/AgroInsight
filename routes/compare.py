@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template
 
 from database.db import get_db
+from routes.decorators import login_required
 
 compare_bp = Blueprint("compare", __name__)
 
 
 @compare_bp.route("/compare")
+@login_required
 def compare_home():
     db = get_db()
     crops = [r["crop"] for r in db.execute(

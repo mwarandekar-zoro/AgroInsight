@@ -13,11 +13,11 @@
       <a class="sidebar-link" href="#"><span class="ic">📈</span> Analytics</a>
       <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
       <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
-      <a class="sidebar-link" href="#"><span class="ic">🤖</span> AI Assistant</a>
-      <a class="sidebar-link" href="#"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="/assistant"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link" href="/reports"><span class="ic">📄</span> Reports</a>
       <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
     </nav>
-    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">Demo User</strong></div>
+    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">{{ session.user_name }}</strong><br><a href="{{ url_for("auth.logout") }}" style="color:var(--danger); font-size:12px;">Log out</a></div>
   </aside>
 
   <div>
@@ -26,7 +26,7 @@
       <div class="topbar-actions">
         <div class="icon-btn" title="Toggle theme">🌙</div>
         <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
-        <div class="avatar">D</div>
+        <div class="avatar">{{ session.user_name[0]|upper }}</div>
       </div>
     </header>
 
@@ -93,6 +93,7 @@
         </div>
       </div>
 
+      <h2 class="chart-section-title">Yield Analysis</h2>
       <div class="chart-grid">
         <div class="card chart-card">
           <div class="chart-card-head">
@@ -106,6 +107,16 @@
         </div>
         <div class="card chart-card">
           <div class="chart-card-head">
+            <h3>Area harvested growth</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="areaGrowthChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
             <h3>Top crops by yield</h3>
             <div class="chart-card-actions">
               <div class="icon-btn" title="Fullscreen">⛶</div>
@@ -114,6 +125,20 @@
           </div>
           <div class="chart-wrap"><canvas id="topCropsChart"></canvas></div>
         </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Top 10 states by yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="topStatesChart"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="chart-section-title">Weather Analysis</h2>
+      <div class="chart-grid">
         <div class="card chart-card">
           <div class="chart-card-head">
             <h3>Rainfall vs yield</h3>
@@ -126,6 +151,40 @@
         </div>
         <div class="card chart-card">
           <div class="chart-card-head">
+            <h3>Temperature vs yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="temperatureYieldChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Humidity vs yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="humidityYieldChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Soil pH distribution</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="phDistributionChart"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="chart-section-title">Soil & Crop Analysis</h2>
+      <div class="chart-grid">
+        <div class="card chart-card">
+          <div class="chart-card-head">
             <h3>Soil NPK balance</h3>
             <div class="chart-card-actions">
               <div class="icon-btn" title="Fullscreen">⛶</div>
@@ -133,6 +192,53 @@
             </div>
           </div>
           <div class="chart-wrap"><canvas id="npkChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Crop distribution by area</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="cropDistributionChart"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="chart-section-title">Geographic Analysis</h2>
+      <div class="chart-grid">
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>State-wise yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="stateYieldChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Top 10 districts by yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="topDistrictsChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-grid full">
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Yield heatmap — state × crop</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+            </div>
+          </div>
+          <p class="heatmap-note">Each crop's column is shaded relative to its own range, so every crop shows visible contrast even though absolute yields differ hugely between crops.</p>
+          <div id="yieldHeatmap" class="heatmap-wrap"></div>
         </div>
       </div>
     </main>

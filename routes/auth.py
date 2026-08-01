@@ -1,9 +1,20 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from urllib.parse import urlparse
 
 from database.db import get_db
 
 auth_bp = Blueprint("auth", __name__)
+
+
+def _safe_next(target):
+    """Only redirect to a relative, in-app path — never an external URL."""
+    if not target:
+        return None
+    parsed = urlparse(target)
+    if parsed.netloc or parsed.scheme:
+        return None
+    return target
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -49,9 +60,10 @@ def login():
 
         session["user_id"] = user["id"]
         session["user_name"] = user["name"]
-        return redirect(url_for("dashboard.dashboard_home"))
+        next_url = _safe_next(request.args.get("next")) or _safe_next(request.form.get("next"))
+        return redirect(next_url or url_for("dashboard.dashboard_home"))
 
-    return render_template("login.html")
+    return render_template("login.html", next=request.args.get("next", ""))
 
 
 @auth_bp.route("/logout")

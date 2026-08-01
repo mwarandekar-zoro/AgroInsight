@@ -160,5 +160,14 @@
 
   cropASel.addEventListener('change', refresh);
   cropBSel.addEventListener('change', refresh);
+
+  (function applyUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const a = params.get('crop_a');
+    const b = params.get('crop_b');
+    if (a && [...cropASel.options].some((o) => o.value === a)) cropASel.value = a;
+    if (b && [...cropBSel.options].some((o) => o.value === b)) cropBSel.value = b;
+  })();
+
   refresh();
 })();

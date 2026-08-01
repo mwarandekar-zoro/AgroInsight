@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}AgriInsight AI{% endblock %}</title>
   <meta name="description" content="Smart Agriculture Analytics & Recommendation Platform">
+  <script>
+    // Runs before paint so there's no flash of the wrong theme.
+    (function () {
+      try {
+        if (localStorage.getItem('agriinsight-theme') === 'light') {
+          document.documentElement.classList.add('light-theme');
+        }
+      } catch (e) { /* localStorage unavailable — default to dark */ }
+    })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block extra_css %}{% endblock %}
 </head>

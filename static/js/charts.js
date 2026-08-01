@@ -200,13 +200,214 @@
     });
   }
 
+  async function refreshAreaGrowth() {
+    const f = currentFilters();
+    const data = await getJSON(`/api/charts/area-growth?${qs(f)}`);
+    upsertChart('areaGrowth', 'areaGrowthChart', {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Total area harvested (ha)',
+          data: data.data,
+          borderColor: COLOR.accent,
+          backgroundColor: 'rgba(59,130,246,0.15)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: commonGrid, y: commonGrid },
+      },
+    });
+  }
+
+  async function refreshTopStates() {
+    const f = currentFilters();
+    const { state, ...rest } = f;
+    const data = await getJSON(`/api/charts/top-states?${qs(rest)}`);
+    upsertChart('topStates', 'topStatesChart', {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{ label: 'Avg yield (kg/ha)', data: data.data, backgroundColor: COLOR.primary, borderRadius: 5, maxBarThickness: 22 }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: commonGrid, y: { ...commonGrid, ticks: { color: COLOR.text, autoSkip: false } } },
+      },
+    });
+  }
+
+  async function refreshStateYield() {
+    const f = currentFilters();
+    const { state, ...rest } = f;
+    const data = await getJSON(`/api/charts/state-yield?${qs(rest)}`);
+    upsertChart('stateYield', 'stateYieldChart', {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{ label: 'Avg yield (kg/ha)', data: data.data, backgroundColor: COLOR.accent, borderRadius: 5, maxBarThickness: 20 }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: commonGrid, y: { ...commonGrid, ticks: { color: COLOR.text, autoSkip: false, font: { size: 10.5 } } } },
+      },
+    });
+  }
+
+  async function refreshTopDistricts() {
+    const f = currentFilters();
+    const { district, ...rest } = f;
+    const data = await getJSON(`/api/charts/top-districts?${qs(rest)}`);
+    upsertChart('topDistricts', 'topDistrictsChart', {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{ label: 'Avg yield (kg/ha)', data: data.data, backgroundColor: COLOR.warning, borderRadius: 5, maxBarThickness: 22 }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: commonGrid, y: { ...commonGrid, ticks: { color: COLOR.text, autoSkip: false, font: { size: 10.5 } } } },
+      },
+    });
+  }
+
+  async function refreshTemperatureYield() {
+    const f = currentFilters();
+    const data = await getJSON(`/api/charts/temperature-yield?${qs(f)}`);
+    upsertChart('temperatureYield', 'temperatureYieldChart', {
+      type: 'scatter',
+      data: { datasets: [{ label: 'Records', data: data.points, backgroundColor: COLOR.accent }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ...commonGrid, title: { display: true, text: 'Temperature (°C)', color: COLOR.text } },
+          y: { ...commonGrid, title: { display: true, text: 'Yield (kg/ha)', color: COLOR.text } },
+        },
+      },
+    });
+  }
+
+  async function refreshHumidityYield() {
+    const f = currentFilters();
+    const data = await getJSON(`/api/charts/humidity-yield?${qs(f)}`);
+    upsertChart('humidityYield', 'humidityYieldChart', {
+      type: 'scatter',
+      data: { datasets: [{ label: 'Records', data: data.points, backgroundColor: COLOR.primary }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ...commonGrid, title: { display: true, text: 'Humidity (%)', color: COLOR.text } },
+          y: { ...commonGrid, title: { display: true, text: 'Yield (kg/ha)', color: COLOR.text } },
+        },
+      },
+    });
+  }
+
+  async function refreshPhDistribution() {
+    const f = currentFilters();
+    const data = await getJSON(`/api/charts/ph-distribution?${qs(f)}`);
+    upsertChart('phDistribution', 'phDistributionChart', {
+      type: 'bar',
+      data: {
+        labels: data.labels.map((v) => `pH ${v}`),
+        datasets: [{ label: 'Records', data: data.data, backgroundColor: COLOR.warning, borderRadius: 6, maxBarThickness: 60 }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: commonGrid, y: commonGrid },
+      },
+    });
+  }
+
+  async function refreshCropDistribution() {
+    const f = currentFilters();
+    const { crop, ...rest } = f;
+    const data = await getJSON(`/api/charts/crop-distribution?${qs(rest)}`);
+    upsertChart('cropDistribution', 'cropDistributionChart', {
+      type: 'doughnut',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          data: data.data,
+          backgroundColor: [COLOR.primary, COLOR.accent, COLOR.warning, '#EF4444'],
+          borderColor: 'transparent',
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { boxWidth: 10, color: COLOR.text } } },
+      },
+    });
+  }
+
+  function heatmapColor(intensity) {
+    // 0 -> faint, 100 -> full primary green, interpolated as opacity
+    const alpha = 0.08 + (intensity / 100) * 0.75;
+    return `rgba(34,197,94,${alpha.toFixed(2)})`;
+  }
+
+  async function refreshHeatmap() {
+    const f = currentFilters();
+    const { state, crop, ...rest } = f;
+    const data = await getJSON(`/api/charts/heatmap?${qs(rest)}`);
+    const container = document.getElementById('yieldHeatmap');
+    if (!container) return;
+
+    let html = '<table class="heatmap-table"><thead><tr><th></th>';
+    data.crops.forEach((c) => { html += `<th class="crop-col">${c}</th>`; });
+    html += '</tr></thead><tbody>';
+
+    data.states.forEach((state, i) => {
+      html += `<tr><td class="state-label">${state}</td>`;
+      data.matrix[i].forEach((cell) => {
+        const bg = heatmapColor(cell.intensity);
+        const label = cell.value != null ? cell.value : '–';
+        html += `<td><div class="heatmap-cell" style="background:${bg};" title="${state}: ${label} kg/ha">${label}</div></td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
   async function refreshAll() {
     await Promise.all([
       refreshKPIs(),
       refreshYieldTrend(),
+      refreshAreaGrowth(),
       refreshTopCrops(),
+      refreshTopStates(),
       refreshRainfallYield(),
+      refreshTemperatureYield(),
+      refreshHumidityYield(),
+      refreshPhDistribution(),
       refreshNPK(),
+      refreshCropDistribution(),
+      refreshStateYield(),
+      refreshTopDistricts(),
+      refreshHeatmap(),
     ]).catch((err) => console.error('Dashboard refresh failed:', err));
   }
 
@@ -226,5 +427,25 @@
     refreshAll();
   });
 
-  refreshDistricts().then(refreshAll);
+  async function applyUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const crop = params.get('crop');
+    const state = params.get('state');
+    const year = params.get('year');
+
+    if (crop && [...cropSel.options].some((o) => o.value === crop)) cropSel.value = crop;
+    if (year && [...yearSel.options].some((o) => o.value === year)) yearSel.value = year;
+    if (state && [...stateSel.options].some((o) => o.value === state)) {
+      stateSel.value = state;
+      await refreshDistricts();
+      const district = params.get('district');
+      if (district && [...districtSel.options].some((o) => o.value === district)) {
+        districtSel.value = district;
+      }
+    } else {
+      await refreshDistricts();
+    }
+  }
+
+  applyUrlParams().then(refreshAll);
 })();

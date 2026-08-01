@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 
 from database.db import get_db
 from ml.predictor import predict
+from routes.decorators import login_required, api_login_required
 
 recommendation_bp = Blueprint("recommendation", __name__)
 
@@ -17,11 +18,13 @@ FIELD_MAP = {
 
 
 @recommendation_bp.route("/recommendation")
+@login_required
 def recommendation_home():
     return render_template("recommendation.html")
 
 
 @recommendation_bp.route("/api/recommend", methods=["POST"])
+@api_login_required
 def recommend():
     payload = request.get_json(silent=True) or {}
 

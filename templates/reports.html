@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Reports — AgriInsight AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">🌱</div> AgriInsight</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
+      <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
+      <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
+      <a class="sidebar-link" href="{{ url_for('assistant.assistant_home') }}"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link active" href="{{ url_for('reports.reports_home') }}"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">{{ session.user_name }}</strong><br><a href="{{ url_for("auth.logout") }}" style="color:var(--danger); font-size:12px;">Log out</a></div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search-box">🔍 Search crops, states, districts…</div>
+      <div class="topbar-actions">
+        <div class="icon-btn" title="Toggle theme">🌙</div>
+        <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
+        <div class="avatar">{{ session.user_name[0]|upper }}</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-head">
+        <div>
+          <h1>Reports</h1>
+          <p class="sub">Filter, preview, then export — every file reflects exactly what's shown below.</p>
+        </div>
+      </div>
+
+      <div class="filter-bar glass">
+        <div class="filter-select">
+          <span class="label">Year</span>
+          <select id="filterYear">
+            <option value="all">All years</option>
+            {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-select">
+          <span class="label">Crop</span>
+          <select id="filterCrop">
+            <option value="all">All crops</option>
+            {% for c in crops %}<option value="{{ c }}">{{ c|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-select">
+          <span class="label">State</span>
+          <select id="filterState">
+            <option value="all">All states</option>
+            {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-select">
+          <span class="label">District</span>
+          <select id="filterDistrict">
+            <option value="all">All districts</option>
+          </select>
+        </div>
+        <button type="button" class="filter-chip reset" id="resetFilters">Reset filters ✕</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">📦</div></div>
+          <div class="kpi-value" id="repRecords">–</div>
+          <div class="kpi-label">Matching records</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🌾</div></div>
+          <div class="kpi-value" id="repYield">–</div>
+          <div class="kpi-label">Average yield (kg/ha)</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🗺️</div></div>
+          <div class="kpi-value" id="repStates">–</div>
+          <div class="kpi-label">States in view</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🌧️</div></div>
+          <div class="kpi-value" id="repRain">–</div>
+          <div class="kpi-label">Avg rainfall (mm)</div>
+        </div>
+      </div>
+
+      <div class="card export-panel">
+        <h3>Export current view</h3>
+        <p class="export-sub">CSV and Excel give you the full filtered row-level data. PDF gives a formatted summary report instead of a raw dump.</p>
+        <div class="export-actions">
+          <a href="#" id="exportCsv" class="btn btn-ghost export-btn">
+            <span class="export-icon">📄</span> CSV <span class="export-tag">raw data</span>
+          </a>
+          <a href="#" id="exportExcel" class="btn btn-ghost export-btn">
+            <span class="export-icon">📊</span> Excel <span class="export-tag">raw data</span>
+          </a>
+          <a href="#" id="exportPdf" class="btn btn-primary export-btn">
+            <span class="export-icon">📑</span> PDF <span class="export-tag">summary report</span>
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}

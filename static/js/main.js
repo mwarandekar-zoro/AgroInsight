@@ -21,12 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
     revealTargets.forEach((el) => io.observe(el));
   }
 
-  // Theme toggle (dashboard topbar) — stored in-memory only, no localStorage
+  // Theme toggle (dashboard topbar) — persisted so it survives page loads,
+  // since this is a real multi-page app, not a single-page artifact.
   const themeBtn = document.querySelector('.icon-btn[title="Toggle theme"]');
   if (themeBtn) {
+    const isLight = document.documentElement.classList.contains('light-theme');
+    themeBtn.textContent = isLight ? '☀️' : '🌙';
+
     themeBtn.addEventListener('click', () => {
-      document.documentElement.classList.toggle('light-theme');
-      themeBtn.textContent = document.documentElement.classList.contains('light-theme') ? '☀️' : '🌙';
+      const nowLight = !document.documentElement.classList.contains('light-theme');
+      try {
+        localStorage.setItem('agriinsight-theme', nowLight ? 'light' : 'dark');
+      } catch (e) { /* localStorage unavailable — theme just won't persist */ }
+      // Reload rather than toggle in place: Chart.js reads CSS variables
+      // once at chart creation time, so any charts on the page would stay
+      // the wrong color until reload anyway. This keeps every element —
+      // charts included — consistently themed with zero extra wiring.
+      window.location.reload();
     });
   }
 });

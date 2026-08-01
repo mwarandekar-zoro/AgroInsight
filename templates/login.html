@@ -59,6 +59,7 @@
     {% endwith %}
 
     <form method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="next" value="{{ next }}">
       <div class="field">
         <label for="email">Email</label>
         <input type="email" id="email" name="email" placeholder="you@farm.com" required autofocus>
