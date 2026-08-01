@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Create account — AgriInsight AI{% endblock %}
+{% block extra_css %}
+<style>
+  .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; position: relative; }
+  .auth-wrap::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(700px 400px at 20% 15%, rgba(34,197,94,0.14), transparent 60%),
+      radial-gradient(600px 400px at 80% 85%, rgba(59,130,246,0.12), transparent 60%);
+    pointer-events: none;
+  }
+  .auth-card { width: 100%; max-width: 400px; padding: 38px 34px; position: relative; z-index: 1; }
+  .auth-brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 17px; margin-bottom: 28px; }
+  .auth-card h1 { font-size: 22px; margin-bottom: 6px; }
+  .auth-card .sub { font-size: 13.5px; margin-bottom: 28px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 7px; font-weight: 500; }
+  .field input {
+    width: 100%; padding: 12px 14px; border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font-body); font-size: 14px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .field input:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.05); }
+  .auth-submit { width: 100%; justify-content: center; margin: 6px 0 18px; }
+  .auth-foot { text-align: center; font-size: 13.5px; color: var(--text-muted); }
+  .auth-foot a { color: var(--primary); font-weight: 600; }
+  .flash { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 18px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+  <div class="glass auth-card">
+    <div class="auth-brand"><div class="brand-mark">🌱</div> AgriInsight AI</div>
+    <h1>Create your account</h1>
+    <p class="sub">Set up access to the dashboard, recommendations and reports.</p>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" placeholder="Your name" required autofocus>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@farm.com" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="At least 8 characters" required minlength="8">
+      </div>
+      <button type="submit" class="btn btn-primary auth-submit">Create account</button>
+    </form>
+    <div class="auth-foot">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></div>
+  </div>
+</div>
+{% endblock %}

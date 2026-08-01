@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Database
+database/*.db
+database/*.sqlite3
+
+# Machine Learning models (often large and generated)
+models/*.pkl
+models/*.joblib
+models/*.h5
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/

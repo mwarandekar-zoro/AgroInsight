@@ -1,0 +1,112 @@
+/* =========================================================
+   AgriInsight AI — Recommendation Page
+   ========================================================= */
+
+.rec-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+/* ---------- Form ---------- */
+.rec-form { padding: 24px; }
+.rec-form h3 { font-size: 15px; margin-bottom: 18px; }
+.rec-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rec-field { margin-bottom: 14px; }
+.rec-field label { display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 7px; font-weight: 500; }
+.rec-field input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.rec-field input:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.05); }
+.rec-error {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 12px;
+  display: none;
+}
+.rec-error.show { display: block; }
+
+/* ---------- Result panel ---------- */
+.rec-result-wrap { min-height: 400px; }
+.rec-result { padding: 28px; }
+
+.rec-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 400px;
+  gap: 14px;
+}
+.rec-empty-icon { font-size: 40px; opacity: 0.5; }
+.rec-empty p { max-width: 280px; font-size: 14px; }
+
+.rec-result-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.rec-crop-label { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; font-family: var(--font-mono); margin-bottom: 6px; }
+.rec-crop-name { font-family: var(--font-display); font-size: 30px; font-weight: 700; }
+.rec-confidence { text-align: right; }
+.rec-confidence-value { font-family: var(--font-mono); font-size: 26px; font-weight: 600; color: var(--primary); }
+.rec-confidence-label { font-size: 11.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.rec-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 26px;
+}
+.rec-stat {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+}
+.rec-stat-label { font-size: 11.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.rec-stat-value { font-family: var(--font-mono); font-size: 17px; font-weight: 600; }
+
+.rec-result h4 { font-size: 13.5px; color: var(--text-muted); margin-bottom: 12px; margin-top: 22px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.rec-explanation { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rec-explanation li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  font-size: 13.5px;
+}
+.rec-explanation .ec-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+.rec-explanation li.matched .ec-icon { color: var(--primary); }
+.rec-explanation li.unmatched .ec-icon { color: var(--text-faint); }
+.rec-explanation .ec-label { font-weight: 600; color: var(--text); }
+.rec-explanation .ec-detail { color: var(--text-muted); display: block; margin-top: 2px; }
+
+.rec-probs { display: flex; flex-direction: column; gap: 10px; }
+.rec-prob-row { display: flex; align-items: center; gap: 12px; }
+.rec-prob-row .name { width: 90px; font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+.rec-prob-row .bar-wrap { flex: 1; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.05); overflow: hidden; }
+.rec-prob-row .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.6s cubic-bezier(0.65,0,0.35,1); width: 0%; }
+.rec-prob-row .pct { width: 46px; text-align: right; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-faint); flex-shrink: 0; }
+
+@media (max-width: 900px) {
+  .rec-grid { grid-template-columns: 1fr; }
+  .rec-stats { grid-template-columns: 1fr; }
+}

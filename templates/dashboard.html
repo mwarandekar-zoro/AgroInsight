@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AgriInsight AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">🌱</div> AgriInsight</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
+      <a class="sidebar-link" href="#"><span class="ic">📈</span> Analytics</a>
+      <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
+      <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
+      <a class="sidebar-link" href="#"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link" href="#"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">Demo User</strong></div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search-box">🔍 Search crops, states, districts…</div>
+      <div class="topbar-actions">
+        <div class="icon-btn" title="Toggle theme">🌙</div>
+        <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
+        <div class="avatar">D</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-head">
+        <div>
+          <h1>Overview</h1>
+          <p class="sub">All charts respond to the filters below — nothing here is static.</p>
+        </div>
+        <a href="#" class="btn btn-ghost btn-sm">📄 Export report</a>
+      </div>
+
+      <div class="filter-bar glass">
+        <div class="filter-select">
+          <span class="label">Year</span>
+          <select id="filterYear">
+            <option value="all">All years</option>
+            {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-select">
+          <span class="label">Crop</span>
+          <select id="filterCrop">
+            <option value="all">All crops</option>
+            {% for c in crops %}<option value="{{ c }}">{{ c|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-select">
+          <span class="label">State</span>
+          <select id="filterState">
+            <option value="all">All states</option>
+            {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="filter-select">
+          <span class="label">District</span>
+          <select id="filterDistrict">
+            <option value="all">All districts</option>
+          </select>
+        </div>
+        <button type="button" class="filter-chip reset" id="resetFilters">Reset filters ✕</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🌾</div><div class="kpi-trend pos" id="kpiYieldTrend"></div></div>
+          <div class="kpi-value" id="kpiYield">–</div>
+          <div class="kpi-label">Average yield (kg/ha)</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🗺️</div></div>
+          <div class="kpi-value" id="kpiStates">–</div>
+          <div class="kpi-label">States in view</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🌧️</div></div>
+          <div class="kpi-value" id="kpiRain">–</div>
+          <div class="kpi-label">Avg rainfall (mm)</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-top"><div class="kpi-icon">🧪</div></div>
+          <div class="kpi-value" id="kpiPh">–</div>
+          <div class="kpi-label">Avg soil pH</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Year-wise yield trend</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="yieldTrendChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Top crops by yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="topCropsChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Rainfall vs yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="rainfallYieldChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Soil NPK balance</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="npkChart"></canvas></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Crop Recommendation — AgriInsight AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/recommendation.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">🌱</div> AgriInsight</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
+      <a class="sidebar-link active" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
+      <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
+      <a class="sidebar-link" href="#"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link" href="#"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">Demo User</strong></div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search-box">🔍 Search crops, states, districts…</div>
+      <div class="topbar-actions">
+        <div class="icon-btn" title="Toggle theme">🌙</div>
+        <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
+        <div class="avatar">D</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-head">
+        <div>
+          <h1>Crop Recommendation</h1>
+          <p class="sub">Enter your field conditions — the model recommends a crop and shows exactly why.</p>
+        </div>
+      </div>
+
+      <div class="rec-grid">
+        <form class="card rec-form" id="recForm">
+          <h3>Field conditions</h3>
+
+          <div class="rec-field-row">
+            <div class="rec-field">
+              <label>Nitrogen (N req, kg/ha)</label>
+              <input type="number" step="0.1" name="nitrogen" value="25" min="0" required>
+            </div>
+            <div class="rec-field">
+              <label>Phosphorus (P req, kg/ha)</label>
+              <input type="number" step="0.1" name="phosphorus" value="12" min="0" required>
+            </div>
+          </div>
+
+          <div class="rec-field-row">
+            <div class="rec-field">
+              <label>Potassium (K req, kg/ha)</label>
+              <input type="number" step="0.1" name="potassium" value="20" min="0" required>
+            </div>
+            <div class="rec-field">
+              <label>Soil pH</label>
+              <input type="number" step="0.1" name="ph" value="6.3" min="0" max="14" required>
+            </div>
+          </div>
+
+          <div class="rec-field-row">
+            <div class="rec-field">
+              <label>Temperature (°C)</label>
+              <input type="number" step="0.1" name="temperature" value="24" required>
+            </div>
+            <div class="rec-field">
+              <label>Humidity (%)</label>
+              <input type="number" step="0.1" name="humidity" value="72" min="0" max="100" required>
+            </div>
+          </div>
+
+          <div class="rec-field">
+            <label>Rainfall (mm)</label>
+            <input type="number" step="1" name="rainfall" value="900" min="0" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="recSubmit" style="width:100%; justify-content:center; margin-top:8px;">
+            Recommend a crop
+          </button>
+          <div class="rec-error" id="recError"></div>
+        </form>
+
+        <div class="rec-result-wrap">
+          <div class="card rec-result rec-empty" id="recEmpty">
+            <div class="rec-empty-icon">🌾</div>
+            <p>Fill in the field conditions and submit to get a recommendation.</p>
+          </div>
+
+          <div class="card rec-result" id="recResult" style="display:none;">
+            <div class="rec-result-head">
+              <div>
+                <div class="rec-crop-label">Recommended crop</div>
+                <div class="rec-crop-name" id="resCrop">–</div>
+              </div>
+              <div class="rec-confidence">
+                <div class="rec-confidence-value" id="resConfidence">–</div>
+                <div class="rec-confidence-label">confidence</div>
+              </div>
+            </div>
+
+            <div class="rec-stats">
+              <div class="rec-stat">
+                <div class="rec-stat-label">Expected yield</div>
+                <div class="rec-stat-value" id="resYield">–</div>
+              </div>
+              <div class="rec-stat">
+                <div class="rec-stat-label">Best state</div>
+                <div class="rec-stat-value" id="resState">–</div>
+              </div>
+              <div class="rec-stat">
+                <div class="rec-stat-label">Best district</div>
+                <div class="rec-stat-value" id="resDistrict">–</div>
+              </div>
+            </div>
+
+            <h4>Why this crop?</h4>
+            <ul class="rec-explanation" id="resExplanation"></ul>
+
+            <h4>Probability across all crops</h4>
+            <div class="rec-probs" id="resProbs"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/recommendation.js') }}"></script>
+{% endblock %}

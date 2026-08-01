@@ -1,0 +1,111 @@
+/* =========================================================
+   AgriInsight AI — Compare Page
+   ========================================================= */
+
+.compare-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+.compare-select { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.compare-select .label { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+.compare-select select {
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  min-width: 150px;
+  text-align: center;
+}
+.compare-select select:focus { outline: none; border-color: var(--primary); }
+.compare-vs {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Metric comparison cards ---------- */
+.compare-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.compare-metric-card {
+  padding: 18px;
+}
+.compare-metric-label {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.compare-metric-row { display: flex; align-items: center; justify-content: space-between; }
+.compare-metric-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  padding: 4px 0;
+}
+.compare-metric-val.winner { color: var(--primary); }
+.compare-metric-val .crop-tag { display: block; font-family: var(--font-body); font-size: 10.5px; color: var(--text-faint); text-transform: uppercase; font-weight: 500; margin-bottom: 2px; }
+
+/* ---------- Charts ---------- */
+.compare-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+/* ---------- Ranked lists ---------- */
+.compare-lists {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.compare-list-card { padding: 18px; }
+.compare-list-card h3 { font-size: 13px; margin-bottom: 12px; color: var(--text-muted); }
+.rank-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: rank; }
+.rank-list li {
+  counter-increment: rank;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.02);
+}
+.rank-list li::before {
+  content: counter(rank);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-right: 8px;
+}
+.rank-list .name { flex: 1; }
+.rank-list .val { font-family: var(--font-mono); color: var(--primary); font-size: 12.5px; }
+
+@media (max-width: 1100px) {
+  .compare-charts { grid-template-columns: 1fr; }
+  .compare-lists { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .compare-picker { flex-direction: column; gap: 14px; }
+  .compare-lists { grid-template-columns: 1fr; }
+}

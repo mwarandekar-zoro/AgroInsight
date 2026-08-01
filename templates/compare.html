@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Compare Crops — AgriInsight AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/compare.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">🌱</div> AgriInsight</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
+      <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
+      <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
+      <a class="sidebar-link active" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
+      <a class="sidebar-link" href="#"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link" href="#"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">Demo User</strong></div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search-box">🔍 Search crops, states, districts…</div>
+      <div class="topbar-actions">
+        <div class="icon-btn" title="Toggle theme">🌙</div>
+        <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
+        <div class="avatar">D</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-head">
+        <div>
+          <h1>Compare Crops</h1>
+          <p class="sub">Pick any two crops — every number below is a live query, nothing precomputed.</p>
+        </div>
+      </div>
+
+      <div class="card compare-picker">
+        <div class="compare-select">
+          <span class="label">Crop A</span>
+          <select id="cropA">
+            {% for c in crops %}<option value="{{ c }}" {% if loop.index0 == 0 %}selected{% endif %}>{{ c|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="compare-vs">VS</div>
+        <div class="compare-select">
+          <span class="label">Crop B</span>
+          <select id="cropB">
+            {% for c in crops %}<option value="{{ c }}" {% if loop.index0 == 1 %}selected{% endif %}>{{ c|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div id="compareError" class="rec-error" style="margin-bottom:16px;"></div>
+
+      <div class="compare-metrics" id="compareMetrics"></div>
+
+      <div class="compare-charts">
+        <div class="card chart-card">
+          <div class="chart-card-head"><h3>Yield trend over time</h3></div>
+          <div class="chart-wrap"><canvas id="compareTrendChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head"><h3>Nutrient & climate profile</h3></div>
+          <div class="chart-wrap"><canvas id="compareRadarChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="compare-lists">
+        <div class="card compare-list-card">
+          <h3 id="topStatesLabelA">Top states —</h3>
+          <ol class="rank-list" id="topStatesA"></ol>
+        </div>
+        <div class="card compare-list-card">
+          <h3 id="topStatesLabelB">Top states —</h3>
+          <ol class="rank-list" id="topStatesB"></ol>
+        </div>
+        <div class="card compare-list-card">
+          <h3 id="topDistrictsLabelA">Top districts —</h3>
+          <ol class="rank-list" id="topDistrictsA"></ol>
+        </div>
+        <div class="card compare-list-card">
+          <h3 id="topDistrictsLabelB">Top districts —</h3>
+          <ol class="rank-list" id="topDistrictsB"></ol>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/compare.js') }}"></script>
+{% endblock %}
