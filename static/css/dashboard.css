@@ -156,6 +156,82 @@
 .filter-select select:focus { outline: none; }
 .filter-select select option { background: var(--card); color: var(--text); }
 
+/* ---------- Multi-select filter dropdown ---------- */
+.multiselect { position: relative; }
+.ms-trigger {
+  display: flex; align-items: center; gap: 6px;
+  background: transparent; border: none;
+  color: var(--text); font-family: var(--font-body); font-size: 13px;
+  cursor: pointer; padding: 0; max-width: 170px;
+}
+.ms-trigger-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.ms-trigger-caret { color: var(--text-faint); font-size: 11px; }
+.multiselect.active .ms-trigger-text { color: var(--primary); }
+.multiselect.active { border-color: var(--primary-dim) !important; }
+
+.ms-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  max-width: 280px;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+  padding: 10px;
+  z-index: 40;
+}
+.ms-panel.open { display: block; }
+
+.ms-search {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+}
+.ms-search:focus { outline: none; border-color: var(--border-strong); }
+
+.ms-actions { display: flex; gap: 6px; margin-bottom: 8px; }
+.ms-actions button {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+.ms-actions button:hover { color: var(--text); border-color: var(--border-strong); }
+
+.ms-options {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ms-option {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-muted);
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ms-option:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.ms-option input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 14px; height: 14px; flex-shrink: 0;
+}
+
 /* ---------- KPI grid ---------- */
 .kpi-grid {
   display: grid;
@@ -244,4 +320,149 @@
   .app-shell { grid-template-columns: 1fr; }
   .sidebar { display: none; }
   .search-box { width: 180px; }
+}
+
+/* =========================================================
+   LIGHT THEME — dashboard overrides only
+   Dark mode leans on translucent white overlays throughout this file
+   (rgba(255,255,255,0.03) etc.) for hover/surface states — those read
+   as pure white-on-white here, which is what made the first light-mode
+   pass still feel flat. This version leans harder into real, visible
+   borders and a page background that's a clear shade darker than the
+   cards sitting on it, so the shell (sidebar/topbar) and the content
+   (cards) read as distinct layers instead of one undifferentiated
+   white surface. Layout/grid/JS are untouched — dark mode is untouched.
+   ========================================================= */
+
+html.light-theme .sidebar {
+  background: #FFFFFF;
+  border-right: 1px solid var(--border);
+}
+html.light-theme .sidebar-link:hover {
+  background: #F1F3F8;
+  color: var(--text);
+}
+html.light-theme .sidebar-link.active {
+  background: rgba(21,128,61,0.08);
+  border: none;
+  border-left: 3px solid var(--primary);
+  padding-left: 11px; /* -3px to offset the new left border, keeps icon/text aligned with inactive links */
+  color: var(--primary-dim);
+  font-weight: 600;
+}
+html.light-theme .sidebar-foot { border-top-color: var(--border); }
+
+html.light-theme .topbar {
+  border-bottom: 1px solid var(--border);
+}
+html.light-theme .search-box {
+  background: #F3F4F8;
+  border-color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+html.light-theme .search-box:hover {
+  background: #FFFFFF;
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+html.light-theme .avatar { box-shadow: 0 2px 8px rgba(21,128,61,0.3); }
+
+html.light-theme .page-head h1 { letter-spacing: -0.03em; }
+html.light-theme .page-head .sub { color: var(--text-muted); }
+
+/* ---------- Filter bar ---------- */
+html.light-theme .filter-bar {
+  background: #FFFFFF;
+  border-color: var(--border);
+  box-shadow: var(--shadow-card);
+}
+html.light-theme .filter-chip,
+html.light-theme .filter-select {
+  background: #F3F4F8;
+  border-color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+html.light-theme .filter-chip:hover,
+html.light-theme .filter-select:hover {
+  background: #FFFFFF;
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+html.light-theme .filter-chip.reset { background: rgba(220,38,38,0.08); border-color: transparent; }
+html.light-theme .filter-chip.reset:hover { background: rgba(220,38,38,0.14); }
+html.light-theme .filter-select select option { background: #FFFFFF; }
+
+/* ---------- Multi-select filter dropdown ---------- */
+html.light-theme .multiselect.active {
+  background: rgba(21,128,61,0.08);
+  border-color: rgba(21,128,61,0.4) !important;
+}
+html.light-theme .ms-panel {
+  background: #FFFFFF;
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-pop);
+}
+html.light-theme .ms-search {
+  background: #F3F4F8;
+  border-color: transparent;
+}
+html.light-theme .ms-search:focus { border-color: var(--accent); background: #FFFFFF; }
+html.light-theme .ms-actions button {
+  background: #F3F4F8;
+  border-color: transparent;
+}
+html.light-theme .ms-actions button:hover {
+  background: #E7E9F0;
+  color: var(--text);
+}
+html.light-theme .ms-option:hover { background: #F1F3F8; }
+
+/* ---------- KPI cards ---------- */
+html.light-theme .kpi-card { padding: 22px; }
+html.light-theme .kpi-icon {
+  width: 38px; height: 38px;
+  border-width: 1.5px;
+}
+html.light-theme .kpi-icon.icon-yield { background: rgba(21,128,61,0.12);  border-color: rgba(21,128,61,0.3); }
+html.light-theme .kpi-icon.icon-map   { background: rgba(79,70,229,0.12); border-color: rgba(79,70,229,0.3); }
+html.light-theme .kpi-icon.icon-rain  { background: rgba(2,132,199,0.12); border-color: rgba(2,132,199,0.3); }
+html.light-theme .kpi-icon.icon-soil  { background: rgba(180,83,9,0.12);  border-color: rgba(180,83,9,0.3); }
+html.light-theme .kpi-trend.pos { background: rgba(21,128,61,0.12); font-weight: 700; }
+html.light-theme .kpi-trend.neg { background: rgba(220,38,38,0.12); font-weight: 700; }
+/* bold display numerals instead of the dark theme's monospace treatment
+   — reads as a bigger, more confident "hero number", closer to how
+   Stripe/Linear present headline metrics */
+html.light-theme .kpi-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+html.light-theme .kpi-label { color: var(--text-muted); font-weight: 500; }
+
+/* ---------- Chart cards ---------- */
+html.light-theme .chart-card { padding: 22px; }
+html.light-theme .chart-card-head h3 { color: var(--text); font-weight: 600; }
+html.light-theme .chart-card-actions .icon-btn { width: 30px; height: 30px; }
+
+html.light-theme .chart-section-title {
+  border-bottom-color: var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+html.light-theme .chart-section-title::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 2px;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+html.light-theme .heatmap-table th { color: var(--text-muted); }
+html.light-theme .heatmap-cell {
+  border: 1px solid rgba(15,23,42,0.06);
+  color: var(--text);
+  font-weight: 700;
 }

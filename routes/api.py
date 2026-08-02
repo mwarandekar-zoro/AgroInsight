@@ -2,8 +2,11 @@
 AgroInsight AI — dashboard API
 
 All endpoints accept optional query params: year, crop, state, district.
-Omit a param (or pass "all") to not filter on it. Every route queries
-crop_data / v_crop_year_state directly — no cached/sample data.
+Omit a param (or pass "all") to not filter on it. Each param accepts
+multiple comma-separated values (e.g. crop=rice,maize) to support the
+dashboard's multi-select filters — a single value still works exactly as
+before. Every route queries crop_data / v_crop_year_state directly — no
+cached/sample data.
 """
 from flask import Blueprint, jsonify, request
 
@@ -11,6 +14,18 @@ from database.db import get_db
 from routes.decorators import api_login_required
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+
+def _split_values(raw):
+    """'2015,2016' -> ['2015', '2016']. '' / None / 'all' -> [] (meaning
+    'no filter'). Tolerates stray whitespace and empty entries from a
+    trailing comma."""
+    if not raw:
+        return []
+    values = [v.strip() for v in raw.split(",") if v.strip()]
+    if not values or all(v.lower() == "all" for v in values):
+        return []
+    return [v for v in values if v.lower() != "all"]
 
 
 def _build_where(exclude=()):
@@ -24,23 +39,27 @@ def _build_where(exclude=()):
     clauses = []
     params = []
 
-    year = request.args.get("year")
-    crop = request.args.get("crop")
-    state = request.args.get("state")
-    district = request.args.get("district")
+    years = _split_values(request.args.get("year"))
+    crops = _split_values(request.args.get("crop"))
+    states = _split_values(request.args.get("state"))
+    districts = _split_values(request.args.get("district"))
 
-    if year and year.lower() != "all" and "year" not in exclude:
-        clauses.append("year = ?")
-        params.append(int(year))
-    if crop and crop.lower() != "all" and "crop" not in exclude:
-        clauses.append("crop = ?")
-        params.append(crop.lower())
-    if state and state.lower() != "all" and "state" not in exclude:
-        clauses.append("state_name = ?")
-        params.append(state)
-    if district and district.lower() != "all" and "district" not in exclude:
-        clauses.append("dist_name = ?")
-        params.append(district)
+    def add_in_clause(column, values, cast=None):
+        if not values:
+            return
+        if cast:
+            values = [cast(v) for v in values]
+        clauses.append(f"{column} IN ({','.join('?' for _ in values)})")
+        params.extend(values)
+
+    if "year" not in exclude:
+        add_in_clause("year", years, cast=int)
+    if "crop" not in exclude:
+        add_in_clause("crop", [c.lower() for c in crops])
+    if "state" not in exclude:
+        add_in_clause("state_name", states)
+    if "district" not in exclude:
+        add_in_clause("dist_name", districts)
 
     where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
     return where, params
@@ -49,14 +68,16 @@ def _build_where(exclude=()):
 @api_bp.route("/districts")
 @api_login_required
 def districts():
-    """District list, optionally narrowed to a single state — powers the
-    cascading state -> district filter in the dashboard."""
+    """District list, optionally narrowed to one or more states (comma-
+    separated) — powers the cascading state -> district filter in the
+    dashboard."""
     db = get_db()
-    state = request.args.get("state")
-    if state and state.lower() != "all":
+    states = _split_values(request.args.get("state"))
+    if states:
+        placeholders = ",".join("?" for _ in states)
         rows = db.execute(
-            "SELECT DISTINCT dist_name FROM crop_data WHERE state_name = ? ORDER BY dist_name",
-            (state,),
+            f"SELECT DISTINCT dist_name FROM crop_data WHERE state_name IN ({placeholders}) ORDER BY dist_name",
+            states,
         ).fetchall()
     else:
         rows = db.execute(

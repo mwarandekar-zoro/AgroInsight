@@ -44,44 +44,119 @@
 
 /* =========================================================
    LIGHT THEME
-   Same structure as :root above — only values change. Text-facing
-   accent colors (--primary etc.) are darkened a step from the dark-theme
-   versions so they still clear AA contrast against a white background;
-   button backgrounds keep the brand hue since those aren't text-on-bg.
+   Same variable names as :root above — only values change. The
+   direction here is a cool "slate" SaaS look (closer to Linear/Vercel
+   than a generic admin panel): the page sits one clear shade darker
+   than the cards, so cards read as elevated surfaces instead of
+   blending into the background. Borders are real and visible instead
+   of near-transparent, and shadows are layered (tight contact shadow +
+   soft ambient blur) rather than a single faint blur.
    ========================================================= */
 html.light-theme {
-  --bg: #F5F7F6;
+  --bg: #EEF1F6;
   --bg-raised: #FFFFFF;
   --card: #FFFFFF;
-  --card-hover: #F0F3F1;
-  --border: rgba(15, 23, 20, 0.08);
-  --border-strong: rgba(15, 23, 20, 0.16);
+  --card-hover: #FFFFFF;
+  --border: rgba(15, 23, 42, 0.10);
+  --border-strong: rgba(15, 23, 42, 0.20);
 
-  --primary: #16A34A;
-  --primary-dim: #15803D;
-  --primary-glow: rgba(22, 163, 74, 0.22);
-  --accent: #2563EB;
-  --accent-glow: rgba(37, 99, 235, 0.2);
+  --primary: #15803D;
+  --primary-dim: #166534;
+  --primary-glow: rgba(21, 128, 61, 0.18);
+  /* indigo instead of a plain blue — reads a step more "premium SaaS"
+     (Linear/Stripe territory) while staying in the same cool family as
+     the dark theme's --accent */
+  --accent: #4F46E5;
+  --accent-glow: rgba(79, 70, 229, 0.16);
   --warning: #B45309;
   --danger: #DC2626;
 
-  --text: #10151C;
-  --text-muted: #4B5768;
-  --text-faint: #8892A0;
+  --text: #0B1220;
+  --text-muted: #4B5468;
+  --text-faint: #838EA0;
 
-  --shadow-card: 0 1px 0 rgba(255,255,255,0.6) inset, 0 16px 34px -20px rgba(15,23,20,0.16);
-  --nav-blur-bg: rgba(255, 255, 255, 0.75);
+  /* premium SaaS dashboards (Stripe/Linear/Vercel) lean on a 16px
+     radius for cards — scoped to light mode only, dark theme's
+     --radius-md (14px) is untouched */
+  --radius-md: 16px;
+
+  /* tight contact shadow + wide soft ambient shadow = a card that
+     actually looks lifted off the page, not just outlined */
+  --shadow-card: 0 1px 2px rgba(15,23,42,0.06), 0 1px 1px rgba(15,23,42,0.04), 0 16px 32px -16px rgba(15,23,42,0.22);
+  --shadow-card-hover: 0 2px 4px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.05), 0 28px 48px -20px rgba(15,23,42,0.28);
+  --shadow-pop: 0 8px 16px -4px rgba(15,23,42,0.12), 0 24px 48px -16px rgba(15,23,42,0.24);
+  --shadow-sm: 0 1px 2px rgba(15,23,42,0.06), 0 1px 1px rgba(15,23,42,0.05);
+
+  --nav-blur-bg: rgba(255, 255, 255, 0.92);
 }
 
 html.light-theme body {
-  background-image:
-    radial-gradient(1100px 600px at 85% -10%, rgba(34,197,94,0.06), transparent 60%),
-    radial-gradient(900px 500px at -10% 20%, rgba(59,130,246,0.05), transparent 55%);
+  background-image: none;
 }
 
-/* button text on the primary gradient stays dark in both themes since the
-   gradient itself doesn't change — only called out here for clarity */
-html.light-theme .btn-primary { color: #06170D; }
+/* button text on the primary gradient stays white in light mode since
+   the green was deepened a step for AA text contrast elsewhere */
+html.light-theme .btn-primary { color: #FFFFFF; }
+
+/* ---------------------------------------------------------------
+   The dark theme leans on translucent WHITE overlays for hover states,
+   ghost surfaces, and glass panels — e.g. rgba(255,255,255,0.03). Those
+   are invisible on a light background (white-on-white), which is the
+   main reason the light theme reads as flat and low-contrast. Every
+   rule below re-does that same interaction using neutral-ink overlays,
+   real borders, and visible shadows instead — scoped to light mode
+   only, dark mode is untouched.
+   --------------------------------------------------------------- */
+html.light-theme .icon-btn {
+  background: #F3F4F8;
+  border-color: transparent;
+}
+html.light-theme .icon-btn:hover {
+  background: #FFFFFF;
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+html.light-theme .btn-ghost {
+  background: #FFFFFF;
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+html.light-theme .btn-ghost:hover {
+  background: #FAFAFC;
+  border-color: rgba(15,23,42,0.28);
+  box-shadow: var(--shadow-card);
+}
+
+html.light-theme .glass {
+  background: #FFFFFF;
+  border-color: var(--border);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.light-theme .card {
+  border-color: var(--border);
+  box-shadow: var(--shadow-card);
+}
+html.light-theme .card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+html.light-theme .skeleton {
+  background: linear-gradient(90deg, rgba(15,23,42,0.06) 25%, rgba(15,23,42,0.12) 37%, rgba(15,23,42,0.06) 63%);
+  background-size: 400% 100%;
+}
+
+html.light-theme .mini-stat,
+html.light-theme .feature-icon {
+  background: #FFFFFF;
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
 
 * { box-sizing: border-box; }
 
@@ -192,7 +267,7 @@ img { max-width: 100%; display: block; }
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 .card:hover { border-color: var(--border-strong); background: var(--card-hover); }
 

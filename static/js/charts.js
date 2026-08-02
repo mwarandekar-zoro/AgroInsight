@@ -22,20 +22,26 @@
     border: { display: false },
   };
 
-  const yearSel = document.getElementById('filterYear');
-  const cropSel = document.getElementById('filterCrop');
-  const stateSel = document.getElementById('filterState');
-  const districtSel = document.getElementById('filterDistrict');
-  const resetBtn = document.getElementById('resetFilters');
+  const yearMS = document.getElementById('filterYear');
+  if (!yearMS) return; // not on the dashboard page
 
-  if (!yearSel) return; // not on the dashboard page
+  const filterMS = {
+    year: new MultiSelect(yearMS, 'All years', () => refreshAll()),
+    crop: new MultiSelect(document.getElementById('filterCrop'), 'All crops', () => refreshAll()),
+    state: new MultiSelect(document.getElementById('filterState'), 'All states', async () => {
+      await refreshDistricts();
+      refreshAll();
+    }),
+    district: new MultiSelect(document.getElementById('filterDistrict'), 'All districts', () => refreshAll()),
+  };
+  const resetBtn = document.getElementById('resetFilters');
 
   function currentFilters() {
     return {
-      year: yearSel.value,
-      crop: cropSel.value,
-      state: stateSel.value,
-      district: districtSel.value,
+      year: filterMS.year.getValues().join(','),
+      crop: filterMS.crop.getValues().join(','),
+      state: filterMS.state.getValues().join(','),
+      district: filterMS.district.getValues().join(','),
     };
   }
 
@@ -63,13 +69,9 @@
   }
 
   async function refreshDistricts() {
-    const state = stateSel.value;
+    const state = filterMS.state.getValues().join(',');
     const list = await getJSON(`/api/districts?${qs({ state })}`);
-    const current = districtSel.value;
-    districtSel.innerHTML = '<option value="all">All districts</option>' +
-      list.map((d) => `<option value="${d}">${d}</option>`).join('');
-    // keep the previous selection if it still exists in the new list
-    if (list.includes(current)) districtSel.value = current;
+    filterMS.district.setOptions(list);
   }
 
   async function refreshKPIs() {
@@ -411,19 +413,12 @@
     ]).catch((err) => console.error('Dashboard refresh failed:', err));
   }
 
-  yearSel.addEventListener('change', refreshAll);
-  cropSel.addEventListener('change', refreshAll);
-  districtSel.addEventListener('change', refreshAll);
-  stateSel.addEventListener('change', async () => {
-    await refreshDistricts();
-    refreshAll();
-  });
   resetBtn.addEventListener('click', async () => {
-    yearSel.value = 'all';
-    cropSel.value = 'all';
-    stateSel.value = 'all';
+    filterMS.year.clear();
+    filterMS.crop.clear();
+    filterMS.state.clear();
     await refreshDistricts();
-    districtSel.value = 'all';
+    filterMS.district.clear();
     refreshAll();
   });
 
@@ -432,16 +427,17 @@
     const crop = params.get('crop');
     const state = params.get('state');
     const year = params.get('year');
+    const district = params.get('district');
 
-    if (crop && [...cropSel.options].some((o) => o.value === crop)) cropSel.value = crop;
-    if (year && [...yearSel.options].some((o) => o.value === year)) yearSel.value = year;
-    if (state && [...stateSel.options].some((o) => o.value === state)) {
-      stateSel.value = state;
+    // Links from the AI Assistant / other pages pass a single value each —
+    // still works fine as a one-item selection in the multi-select.
+    if (crop) filterMS.crop.setValues(crop.split(','));
+    if (year) filterMS.year.setValues(year.split(','));
+
+    if (state) {
+      filterMS.state.setValues(state.split(','));
       await refreshDistricts();
-      const district = params.get('district');
-      if (district && [...districtSel.options].some((o) => o.value === district)) {
-        districtSel.value = district;
-      }
+      if (district) filterMS.district.setValues(district.split(','));
     } else {
       await refreshDistricts();
     }
