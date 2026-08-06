@@ -15,6 +15,7 @@
       <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
       <a class="sidebar-link" href="/assistant"><span class="ic">🤖</span> AI Assistant</a>
       <a class="sidebar-link" href="/reports"><span class="ic">📄</span> Reports</a>
+      <a class="sidebar-link" href="{{ url_for('analyze.analyze_home') }}"><span class="ic">📁</span> Analyze Data</a>
       <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
     </nav>
     <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">{{ session.user_name }}</strong><br><a href="{{ url_for("auth.logout") }}" style="color:var(--danger); font-size:12px;">Log out</a></div>

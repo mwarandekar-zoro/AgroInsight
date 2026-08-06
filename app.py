@@ -10,6 +10,7 @@ from routes.recommendation import recommendation_bp
 from routes.compare import compare_bp
 from routes.chatbot import assistant_bp
 from routes.reports import reports_bp
+from routes.analyze import analyze_bp
 
 
 def create_app():
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(compare_bp)
     app.register_blueprint(assistant_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(analyze_bp)
 
     return app
 
