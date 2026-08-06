@@ -1,4 +1,5 @@
 from chatbot import insights
+from chatbot.llm_handler import get_llm_reply
 from chatbot.query_handler import parse_message
 
 EXAMPLE_PROMPTS = [
@@ -12,7 +13,8 @@ EXAMPLE_PROMPTS = [
 HELP_REPLY = "I can help with things like:\n" + "\n".join(f"• {e}" for e in EXAMPLE_PROMPTS)
 GREETING_REPLY = (
     "Hey! I can answer questions about crops, states and yields in the dataset — "
-    "try asking something like 'best crop for Punjab'."
+    "try asking something like 'best crop for Punjab'. Ask me anything else about "
+    "farming too and I'll do my best to help."
 )
 FALLBACK_REPLY = (
     "I didn't quite catch that. Try naming a crop or state, or ask me to "
@@ -30,6 +32,7 @@ def handle_message(db, message: str) -> dict:
     found_states = parsed["states"]
 
     reply, redirect = FALLBACK_REPLY, None
+    used_canned_fallback = False
 
     if intent == "compare_crops":
         reply, redirect = insights.compare_crops(db, found_crops[0], found_crops[1])
@@ -45,8 +48,16 @@ def handle_message(db, message: str) -> dict:
         reply, redirect = GREETING_REPLY, None
     elif intent == "help":
         reply, redirect = HELP_REPLY, None
+    else:
+        # No known intent matched — try Groq for an open-ended answer
+        # before giving up and showing the canned fallback + examples.
+        llm_reply = get_llm_reply(message, crops, states)
+        if llm_reply:
+            reply, redirect = llm_reply, None
+        else:
+            used_canned_fallback = True
 
-    show_examples = intent in ("fallback", "greeting", "help")
+    show_examples = used_canned_fallback or intent in ("greeting", "help")
 
     return {
         "reply": reply,

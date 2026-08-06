@@ -6,48 +6,210 @@
   const css = getComputedStyle(document.documentElement);
   const COLOR = {
     primary: css.getPropertyValue('--primary').trim() || '#22C55E',
-    accent: css.getPropertyValue('--accent').trim() || '#3B82F6',
+    accent:  css.getPropertyValue('--accent').trim()  || '#3B82F6',
     warning: css.getPropertyValue('--warning').trim() || '#F59E0B',
-    text: css.getPropertyValue('--text-muted').trim() || '#94A3B8',
-    grid: 'rgba(255,255,255,0.06)',
+    text:    css.getPropertyValue('--text-muted').trim() || '#94A3B8',
+    grid:    'rgba(255,255,255,0.06)',
   };
 
-  Chart.defaults.color = COLOR.text;
+  Chart.defaults.color       = COLOR.text;
   Chart.defaults.font.family = "'Inter', ui-sans-serif, sans-serif";
-  Chart.defaults.font.size = 12;
+  Chart.defaults.font.size   = 12;
+
+  // ChartZoom plugin self-registers when its script is loaded — do NOT call
+  // Chart.register(ChartZoom) here again or it throws "Plugin already registered"
+  // and kills the entire JS module. Wrap in try/catch so any plugin error never
+  // prevents charts from rendering.
+  let zoomAvailable = false;
+  try {
+    zoomAvailable = typeof ChartZoom !== 'undefined' && typeof Hammer !== 'undefined';
+  } catch (e) { /* ignore */ }
 
   const commonGrid = {
-    grid: { color: COLOR.grid, drawTicks: false },
-    ticks: { color: COLOR.text },
+    grid:   { color: COLOR.grid, drawTicks: false },
+    ticks:  { color: COLOR.text },
     border: { display: false },
   };
 
+  // -------------------------------------------------------
+  // Fullscreen Modal
+  // -------------------------------------------------------
+  const modalEl = document.createElement('div');
+  modalEl.id = 'chartModal';
+  modalEl.innerHTML = `
+    <div class="chart-modal-box">
+      <div class="chart-modal-header">
+        <span class="chart-modal-title" id="chartModalTitle">Chart</span>
+        <div class="chart-modal-close" id="chartModalClose" title="Close">✕</div>
+      </div>
+      <div class="chart-modal-hint">🖱 Scroll to zoom &nbsp;|&nbsp; Drag to pan &nbsp;|&nbsp; Double-click to reset zoom</div>
+      <div class="chart-modal-canvas-wrap">
+        <canvas id="chartModalCanvas"></canvas>
+      </div>
+    </div>`;
+  document.body.appendChild(modalEl);
+
+  let modalChartInstance = null;
+
+  function closeModal() {
+    modalEl.classList.remove('open');
+    if (modalChartInstance) {
+      modalChartInstance.destroy();
+      modalChartInstance = null;
+    }
+  }
+
+  document.getElementById('chartModalClose').addEventListener('click', closeModal);
+  modalEl.addEventListener('click', (e) => {
+    if (e.target === modalEl) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  function openModal(chartInstance, title) {
+    document.getElementById('chartModalTitle').textContent = title || 'Chart';
+    const canvas = document.getElementById('chartModalCanvas');
+
+    if (modalChartInstance) {
+      modalChartInstance.destroy();
+      modalChartInstance = null;
+    }
+
+    // Build a fresh, serialization-safe config from the chart's live data.
+    // We CANNOT use JSON.parse(JSON.stringify(config)) because Chart.js configs
+    // contain functions (callbacks, tick formatters) that JSON cannot serialize.
+    const src = chartInstance.config;
+    const freshCfg = {
+      type: src.type,
+      data: src.data,   // data arrays are plain objects — safe to share by ref
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: Object.assign({}, src.options && src.options.plugins),
+        scales: src.options && src.options.scales,
+        indexAxis: src.options && src.options.indexAxis,
+      },
+    };
+    if (zoomAvailable) {
+      freshCfg.options.plugins.zoom = buildZoomOptions();
+    }
+
+    modalEl.classList.add('open');
+
+    // Let CSS layout settle before rendering
+    requestAnimationFrame(() => {
+      try {
+        modalChartInstance = new Chart(canvas.getContext('2d'), freshCfg);
+      } catch (err) {
+        console.error('Modal chart failed to render:', err);
+      }
+    });
+  }
+
+  // -------------------------------------------------------
+  // Zoom plugin options factory
+  // -------------------------------------------------------
+  function buildZoomOptions() {
+    return {
+      pan: {
+        enabled: true,
+        mode: 'xy',
+        threshold: 5,
+      },
+      zoom: {
+        wheel: { enabled: true, speed: 0.08 },
+        pinch: { enabled: true },
+        mode: 'xy',
+        onZoomComplete({ chart }) {
+          chart.update('none');
+        },
+      },
+      limits: {
+        x: { minRange: 1 },
+        y: { minRange: 1 },
+      },
+    };
+  }
+
+  function applyZoomToConfig(config) {
+    if (!zoomAvailable) return;
+    config.options = config.options || {};
+    config.options.plugins = config.options.plugins || {};
+    config.options.plugins.zoom = buildZoomOptions();
+  }
+
+  function destroyExistingChart(el) {
+    if (!el) return;
+    const existing = Chart.getChart(el);
+    if (existing) {
+      existing.destroy();
+    }
+  }
+
+  // -------------------------------------------------------
+  // Controls: fullscreen + export attached to each chart card
+  // -------------------------------------------------------
+  function attachControls(chartInstance, canvasId, title) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const card = canvas.closest('.chart-card');
+    if (!card) return;
+
+    const fsBtn = card.querySelector('.icon-btn[title="Fullscreen"]');
+    const exBtn = card.querySelector('.icon-btn[title="Export"]');
+
+    if (fsBtn) {
+      // Remove previous listeners by cloning
+      const newFs = fsBtn.cloneNode(true);
+      fsBtn.parentNode.replaceChild(newFs, fsBtn);
+      newFs.addEventListener('click', () => openModal(chartInstance, title));
+    }
+
+    if (exBtn) {
+      const newEx = exBtn.cloneNode(true);
+      exBtn.parentNode.replaceChild(newEx, exBtn);
+      newEx.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href     = chartInstance.toBase64Image('image/png', 1);
+        link.download = (title || canvasId).replace(/\s+/g, '_') + '.png';
+        link.click();
+      });
+    }
+
+    // Double-click on chart canvas to reset zoom
+    canvas.addEventListener('dblclick', () => {
+      chartInstance.resetZoom && chartInstance.resetZoom();
+    });
+  }
+
+  // -------------------------------------------------------
+  // Filters
+  // -------------------------------------------------------
   const yearMS = document.getElementById('filterYear');
-  if (!yearMS) return; // not on the dashboard page
+  if (!yearMS) return; // not on dashboard page
 
   const filterMS = {
-    year: new MultiSelect(yearMS, 'All years', () => refreshAll()),
-    crop: new MultiSelect(document.getElementById('filterCrop'), 'All crops', () => refreshAll()),
-    state: new MultiSelect(document.getElementById('filterState'), 'All states', async () => {
-      await refreshDistricts();
-      refreshAll();
-    }),
+    year:     new MultiSelect(yearMS, 'All years', () => refreshAll()),
+    crop:     new MultiSelect(document.getElementById('filterCrop'),     'All crops',     () => refreshAll()),
+    state:    new MultiSelect(document.getElementById('filterState'),    'All states',    async () => { await refreshDistricts(); refreshAll(); }),
     district: new MultiSelect(document.getElementById('filterDistrict'), 'All districts', () => refreshAll()),
   };
+
   const resetBtn = document.getElementById('resetFilters');
 
   function currentFilters() {
     return {
-      year: filterMS.year.getValues().join(','),
-      crop: filterMS.crop.getValues().join(','),
-      state: filterMS.state.getValues().join(','),
+      year:     filterMS.year.getValues().join(','),
+      crop:     filterMS.crop.getValues().join(','),
+      state:    filterMS.state.getValues().join(','),
       district: filterMS.district.getValues().join(','),
     };
   }
 
-  function qs(params) {
-    return new URLSearchParams(params).toString();
-  }
+  function qs(params) { return new URLSearchParams(params).toString(); }
 
   async function getJSON(url) {
     const res = await fetch(url);
@@ -55,46 +217,96 @@
     return res.json();
   }
 
+  // -------------------------------------------------------
+  // Chart registry
+  // -------------------------------------------------------
   let charts = {};
 
-  function upsertChart(key, ctxId, config) {
-    if (charts[key]) {
-      charts[key].data = config.data;
-      charts[key].update();
-      return;
-    }
+  function upsertChart(key, ctxId, config, title) {
+    applyZoomToConfig(config);
+
     const el = document.getElementById(ctxId);
     if (!el) return;
-    charts[key] = new Chart(el, config);
+
+    if (charts[key]) {
+      charts[key].data    = config.data;
+      charts[key].options = config.options;
+      try {
+        charts[key].update();
+      } catch (err) {
+        console.error(`Chart update failed for ${key}:`, err);
+        if (zoomAvailable && config.options && config.options.plugins) {
+          delete config.options.plugins.zoom;
+          try {
+            charts[key].update();
+          } catch (retryErr) {
+            console.error(`Chart update retry failed for ${key}:`, retryErr);
+          }
+        }
+      }
+      attachControls(charts[key], ctxId, title || key);
+      return;
+    }
+
+    destroyExistingChart(el);
+
+    try {
+      const instance = new Chart(el, config);
+      charts[key] = instance;
+      attachControls(instance, ctxId, title || key);
+    } catch (err) {
+      console.error(`Chart render failed for ${key}:`, err);
+      if (zoomAvailable && config.options && config.options.plugins) {
+        delete config.options.plugins.zoom;
+      }
+      destroyExistingChart(el);
+      try {
+        const instance = new Chart(el, config);
+        charts[key] = instance;
+        attachControls(instance, ctxId, title || key);
+      } catch (retryErr) {
+        console.error(`Chart render retry failed for ${key}:`, retryErr);
+      }
+    }
   }
 
+  // -------------------------------------------------------
+  // District loader
+  // -------------------------------------------------------
   async function refreshDistricts() {
     const state = filterMS.state.getValues().join(',');
-    const list = await getJSON(`/api/districts?${qs({ state })}`);
+    const list  = await getJSON(`/api/districts?${qs({ state })}`);
     filterMS.district.setOptions(list);
   }
 
+  // -------------------------------------------------------
+  // KPIs
+  // -------------------------------------------------------
   async function refreshKPIs() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/kpis?${qs(f)}`);
-    document.getElementById('kpiYield').textContent = data.avg_yield != null ? data.avg_yield.toLocaleString() : '–';
+
+    document.getElementById('kpiYield').textContent  = data.avg_yield  != null ? data.avg_yield.toLocaleString() : '–';
     document.getElementById('kpiStates').textContent = data.state_count ?? '–';
-    document.getElementById('kpiRain').textContent = data.avg_rainfall ?? '–';
-    document.getElementById('kpiPh').textContent = data.avg_ph ?? '–';
+    document.getElementById('kpiRain').textContent   = data.avg_rainfall ?? '–';
+    document.getElementById('kpiPh').textContent     = data.avg_ph ?? '–';
 
     const trendEl = document.getElementById('kpiYieldTrend');
     if (data.yield_delta_pct == null) {
       trendEl.textContent = '';
-      trendEl.className = 'kpi-trend';
+      trendEl.className   = 'kpi-trend';
     } else {
       const up = data.yield_delta_pct >= 0;
       trendEl.textContent = `${up ? '▲' : '▼'} ${Math.abs(data.yield_delta_pct)}%`;
-      trendEl.className = `kpi-trend ${up ? 'pos' : 'neg'}`;
+      trendEl.className   = `kpi-trend ${up ? 'pos' : 'neg'}`;
     }
   }
 
+  // -------------------------------------------------------
+  // Individual chart refreshers
+  // -------------------------------------------------------
   async function refreshYieldTrend() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/yield-trend?${qs(f)}`);
     upsertChart('yieldTrend', 'yieldTrendChart', {
       type: 'line',
@@ -117,14 +329,13 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: commonGrid },
       },
-    });
+    }, 'Year-wise yield trend');
   }
 
   async function refreshTopCrops() {
-    // top-crops is more useful without the crop filter applied to itself
-    const f = currentFilters();
+    const f       = currentFilters();
     const { crop, ...rest } = f;
-    const data = await getJSON(`/api/charts/top-crops?${qs(rest)}`);
+    const data    = await getJSON(`/api/charts/top-crops?${qs(rest)}`);
     upsertChart('topCrops', 'topCropsChart', {
       type: 'bar',
       data: {
@@ -143,21 +354,15 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: commonGrid },
       },
-    });
+    }, 'Top crops by yield');
   }
 
   async function refreshRainfallYield() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/rainfall-yield?${qs(f)}`);
     upsertChart('rainfallYield', 'rainfallYieldChart', {
       type: 'scatter',
-      data: {
-        datasets: [{
-          label: 'Records',
-          data: data.points,
-          backgroundColor: COLOR.warning,
-        }],
-      },
+      data: { datasets: [{ label: 'Records', data: data.points, backgroundColor: COLOR.warning }] },
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -167,11 +372,11 @@
           y: { ...commonGrid, title: { display: true, text: 'Yield (kg/ha)', color: COLOR.text } },
         },
       },
-    });
+    }, 'Rainfall vs yield');
   }
 
   async function refreshNPK() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/npk?${qs(f)}`);
     upsertChart('npk', 'npkChart', {
       type: 'radar',
@@ -199,11 +404,11 @@
           },
         },
       },
-    });
+    }, 'Soil NPK balance');
   }
 
   async function refreshAreaGrowth() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/area-growth?${qs(f)}`);
     upsertChart('areaGrowth', 'areaGrowthChart', {
       type: 'line',
@@ -225,13 +430,13 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: commonGrid },
       },
-    });
+    }, 'Area harvested growth');
   }
 
   async function refreshTopStates() {
-    const f = currentFilters();
+    const f              = currentFilters();
     const { state, ...rest } = f;
-    const data = await getJSON(`/api/charts/top-states?${qs(rest)}`);
+    const data           = await getJSON(`/api/charts/top-states?${qs(rest)}`);
     upsertChart('topStates', 'topStatesChart', {
       type: 'bar',
       data: {
@@ -245,13 +450,13 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: { ...commonGrid, ticks: { color: COLOR.text, autoSkip: false } } },
       },
-    });
+    }, 'Top 10 states by yield');
   }
 
   async function refreshStateYield() {
-    const f = currentFilters();
+    const f              = currentFilters();
     const { state, ...rest } = f;
-    const data = await getJSON(`/api/charts/state-yield?${qs(rest)}`);
+    const data           = await getJSON(`/api/charts/state-yield?${qs(rest)}`);
     upsertChart('stateYield', 'stateYieldChart', {
       type: 'bar',
       data: {
@@ -265,13 +470,13 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: { ...commonGrid, ticks: { color: COLOR.text, autoSkip: false, font: { size: 10.5 } } } },
       },
-    });
+    }, 'State-wise yield');
   }
 
   async function refreshTopDistricts() {
-    const f = currentFilters();
+    const f                  = currentFilters();
     const { district, ...rest } = f;
-    const data = await getJSON(`/api/charts/top-districts?${qs(rest)}`);
+    const data               = await getJSON(`/api/charts/top-districts?${qs(rest)}`);
     upsertChart('topDistricts', 'topDistrictsChart', {
       type: 'bar',
       data: {
@@ -285,11 +490,11 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: { ...commonGrid, ticks: { color: COLOR.text, autoSkip: false, font: { size: 10.5 } } } },
       },
-    });
+    }, 'Top 10 districts by yield');
   }
 
   async function refreshTemperatureYield() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/temperature-yield?${qs(f)}`);
     upsertChart('temperatureYield', 'temperatureYieldChart', {
       type: 'scatter',
@@ -300,14 +505,14 @@
         plugins: { legend: { display: false } },
         scales: {
           x: { ...commonGrid, title: { display: true, text: 'Temperature (°C)', color: COLOR.text } },
-          y: { ...commonGrid, title: { display: true, text: 'Yield (kg/ha)', color: COLOR.text } },
+          y: { ...commonGrid, title: { display: true, text: 'Yield (kg/ha)',     color: COLOR.text } },
         },
       },
-    });
+    }, 'Temperature vs yield');
   }
 
   async function refreshHumidityYield() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/humidity-yield?${qs(f)}`);
     upsertChart('humidityYield', 'humidityYieldChart', {
       type: 'scatter',
@@ -317,15 +522,15 @@
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ...commonGrid, title: { display: true, text: 'Humidity (%)', color: COLOR.text } },
+          x: { ...commonGrid, title: { display: true, text: 'Humidity (%)',   color: COLOR.text } },
           y: { ...commonGrid, title: { display: true, text: 'Yield (kg/ha)', color: COLOR.text } },
         },
       },
-    });
+    }, 'Humidity vs yield');
   }
 
   async function refreshPhDistribution() {
-    const f = currentFilters();
+    const f    = currentFilters();
     const data = await getJSON(`/api/charts/ph-distribution?${qs(f)}`);
     upsertChart('phDistribution', 'phDistributionChart', {
       type: 'bar',
@@ -339,20 +544,20 @@
         plugins: { legend: { display: false } },
         scales: { x: commonGrid, y: commonGrid },
       },
-    });
+    }, 'Soil pH distribution');
   }
 
   async function refreshCropDistribution() {
-    const f = currentFilters();
+    const f           = currentFilters();
     const { crop, ...rest } = f;
-    const data = await getJSON(`/api/charts/crop-distribution?${qs(rest)}`);
+    const data        = await getJSON(`/api/charts/crop-distribution?${qs(rest)}`);
     upsertChart('cropDistribution', 'cropDistributionChart', {
       type: 'doughnut',
       data: {
         labels: data.labels,
         datasets: [{
           data: data.data,
-          backgroundColor: [COLOR.primary, COLOR.accent, COLOR.warning, '#EF4444'],
+          backgroundColor: [COLOR.primary, COLOR.accent, COLOR.warning, '#EF4444', '#8B5CF6', '#EC4899'],
           borderColor: 'transparent',
         }],
       },
@@ -361,20 +566,22 @@
         maintainAspectRatio: false,
         plugins: { legend: { position: 'right', labels: { boxWidth: 10, color: COLOR.text } } },
       },
-    });
+    }, 'Crop distribution by area');
   }
 
+  // -------------------------------------------------------
+  // Heatmap (not a Chart.js chart, no zoom needed)
+  // -------------------------------------------------------
   function heatmapColor(intensity) {
-    // 0 -> faint, 100 -> full primary green, interpolated as opacity
     const alpha = 0.08 + (intensity / 100) * 0.75;
     return `rgba(34,197,94,${alpha.toFixed(2)})`;
   }
 
   async function refreshHeatmap() {
-    const f = currentFilters();
+    const f               = currentFilters();
     const { state, crop, ...rest } = f;
-    const data = await getJSON(`/api/charts/heatmap?${qs(rest)}`);
-    const container = document.getElementById('yieldHeatmap');
+    const data            = await getJSON(`/api/charts/heatmap?${qs(rest)}`);
+    const container       = document.getElementById('yieldHeatmap');
     if (!container) return;
 
     let html = '<table class="heatmap-table"><thead><tr><th></th>';
@@ -384,7 +591,7 @@
     data.states.forEach((state, i) => {
       html += `<tr><td class="state-label">${state}</td>`;
       data.matrix[i].forEach((cell) => {
-        const bg = heatmapColor(cell.intensity);
+        const bg    = heatmapColor(cell.intensity);
         const label = cell.value != null ? cell.value : '–';
         html += `<td><div class="heatmap-cell" style="background:${bg};" title="${state}: ${label} kg/ha">${label}</div></td>`;
       });
@@ -394,6 +601,9 @@
     container.innerHTML = html;
   }
 
+  // -------------------------------------------------------
+  // Refresh all
+  // -------------------------------------------------------
   async function refreshAll() {
     await Promise.all([
       refreshKPIs(),
@@ -422,17 +632,18 @@
     refreshAll();
   });
 
+  // -------------------------------------------------------
+  // URL param pre-selection
+  // -------------------------------------------------------
   async function applyUrlParams() {
-    const params = new URLSearchParams(window.location.search);
-    const crop = params.get('crop');
-    const state = params.get('state');
-    const year = params.get('year');
+    const params   = new URLSearchParams(window.location.search);
+    const crop     = params.get('crop');
+    const state    = params.get('state');
+    const year     = params.get('year');
     const district = params.get('district');
 
-    // Links from the AI Assistant / other pages pass a single value each —
-    // still works fine as a one-item selection in the multi-select.
-    if (crop) filterMS.crop.setValues(crop.split(','));
-    if (year) filterMS.year.setValues(year.split(','));
+    if (crop)  filterMS.crop.setValues(crop.split(','));
+    if (year)  filterMS.year.setValues(year.split(','));
 
     if (state) {
       filterMS.state.setValues(state.split(','));

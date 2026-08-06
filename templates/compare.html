@@ -23,10 +23,20 @@
 
   <div>
     <header class="topbar">
-      <div class="search-box">🔍 Search crops, states, districts…</div>
+      <div class="search-box" id="topbarSearch">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="topbarSearchInput" placeholder="Search crops, states, districts…" autocomplete="off">
+        <div class="search-results" id="topbarSearchResults"></div>
+      </div>
       <div class="topbar-actions">
         <div class="icon-btn" title="Toggle theme">🌙</div>
-        <div class="icon-btn" title="Notifications">🔔<span class="badge"></span></div>
+        <div class="icon-btn" id="notifBtn" title="Notifications">
+          🔔<span class="badge" id="notifBadge" hidden></span>
+          <div class="notif-panel" id="notifPanel" hidden>
+            <div class="notif-panel-head">Notifications</div>
+            <div class="notif-empty">You're all caught up 🎉<br><span>Nothing new right now.</span></div>
+          </div>
+        </div>
         <div class="avatar">{{ session.user_name[0]|upper }}</div>
       </div>
     </header>

@@ -86,6 +86,44 @@ def districts():
     return jsonify([r["dist_name"] for r in rows])
 
 
+@api_bp.route("/search")
+@api_login_required
+def search():
+    """Powers the topbar search box. Matches the query against crop,
+    state and district names and returns a few of each, capped so the
+    dropdown stays short. Each result also carries the dashboard filter
+    key/value the front end should link to when it's clicked."""
+    q = (request.args.get("q") or "").strip()
+    if len(q) < 2:
+        return jsonify({"crops": [], "states": [], "districts": []})
+
+    like = f"%{q.lower()}%"
+    db = get_db()
+    limit = 5
+
+    crop_rows = db.execute(
+        "SELECT DISTINCT crop FROM crop_data WHERE crop LIKE ? ORDER BY crop LIMIT ?",
+        (like, limit),
+    ).fetchall()
+    state_rows = db.execute(
+        "SELECT DISTINCT state_name FROM crop_data WHERE LOWER(state_name) LIKE ? ORDER BY state_name LIMIT ?",
+        (like, limit),
+    ).fetchall()
+    district_rows = db.execute(
+        "SELECT DISTINCT dist_name, state_name FROM crop_data WHERE LOWER(dist_name) LIKE ? ORDER BY dist_name LIMIT ?",
+        (like, limit),
+    ).fetchall()
+
+    return jsonify({
+        "crops": [{"label": r["crop"].capitalize(), "value": r["crop"]} for r in crop_rows],
+        "states": [{"label": r["state_name"], "value": r["state_name"]} for r in state_rows],
+        "districts": [
+            {"label": f"{r['dist_name']} ({r['state_name']})", "value": r["dist_name"], "state": r["state_name"]}
+            for r in district_rows
+        ],
+    })
+
+
 @api_bp.route("/kpis")
 @api_login_required
 def kpis():
