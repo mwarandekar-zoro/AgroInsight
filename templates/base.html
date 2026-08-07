@@ -20,6 +20,133 @@
 </head>
 <body>
   {% block body %}{% endblock %}
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="settings-modal-backdrop" hidden>
+    <div class="settings-modal-box">
+      <div class="settings-modal-header">
+        <div class="settings-modal-title"><span>⚙️</span> Application Settings</div>
+        <button type="button" class="settings-modal-close" id="closeSettingsBtn" title="Close">✕</button>
+      </div>
+
+      <div class="settings-nav">
+        <button type="button" class="settings-tab-btn active" data-tab="general">General</button>
+        <button type="button" class="settings-tab-btn" data-tab="appearance">Appearance</button>
+        <button type="button" class="settings-tab-btn" data-tab="notifications">Notifications</button>
+        <button type="button" class="settings-tab-btn" data-tab="account">Account</button>
+      </div>
+
+      <div class="settings-content">
+        <!-- General Tab -->
+        <div class="settings-tab-pane active" id="tab-general">
+          <div class="settings-group">
+            <label class="settings-label">Yield Unit Display</label>
+            <select class="settings-input" id="settingYieldUnit">
+              <option value="kg_ha">Kilograms per hectare (kg/ha)</option>
+              <option value="ton_ha">Tonnes per hectare (t/ha)</option>
+              <option value="quintal_ha">Quintals per hectare (q/ha)</option>
+            </select>
+            <span class="settings-hint">Used for primary chart metrics and KPI display.</span>
+          </div>
+
+          <div class="settings-group">
+            <label class="settings-label">Temperature Unit</label>
+            <select class="settings-input" id="settingTempUnit">
+              <option value="celsius">Celsius (°C)</option>
+              <option value="fahrenheit">Fahrenheit (°F)</option>
+            </select>
+          </div>
+
+          <div class="settings-group toggle-group">
+            <div>
+              <div class="settings-label">Auto-refresh Dashboard Data</div>
+              <div class="settings-hint">Periodically refresh live dataset metrics.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="settingAutoRefresh" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Appearance Tab -->
+        <div class="settings-tab-pane" id="tab-appearance">
+          <div class="settings-group">
+            <label class="settings-label">Theme Mode</label>
+            <div class="theme-options">
+              <label class="theme-option">
+                <input type="radio" name="settingsTheme" value="dark" checked>
+                <div class="theme-card dark-preview">
+                  <span>🌙 Dark Mode</span>
+                </div>
+              </label>
+              <label class="theme-option">
+                <input type="radio" name="settingsTheme" value="light">
+                <div class="theme-card light-preview">
+                  <span>☀️ Light Mode</span>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="settings-group toggle-group">
+            <div>
+              <div class="settings-label">Chart Animations</div>
+              <div class="settings-hint">Enable smooth entrance animations for data visualizations.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="settingAnimations" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div class="settings-tab-pane" id="tab-notifications">
+          <div class="settings-group toggle-group">
+            <div>
+              <div class="settings-label">Weather Risk Alerts</div>
+              <div class="settings-hint">Notify when extreme rainfall or temperature anomalies are detected.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="settingWeatherAlerts" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="settings-group toggle-group">
+            <div>
+              <div class="settings-label">Crop Insight Recommendations</div>
+              <div class="settings-hint">Receive automated AI recommendations on field data updates.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="settingAiAlerts" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Account Tab -->
+        <div class="settings-tab-pane" id="tab-account">
+          <div class="settings-group">
+            <label class="settings-label">User Profile</label>
+            <input type="text" class="settings-input" value="{{ session.user_name }}" readonly>
+            <span class="settings-hint">Authenticated account session.</span>
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">Role / Organization</label>
+            <input type="text" class="settings-input" value="Agricultural Data Analyst" placeholder="e.g. Agronomist">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-modal-footer">
+        <button type="button" class="btn btn-ghost btn-sm" id="resetSettingsBtn">Reset Defaults</button>
+        <button type="button" class="btn btn-primary btn-sm" id="saveSettingsBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsToast" class="toast-notification" hidden>Settings saved successfully!</div>
+
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   {% block extra_js %}{% endblock %}
 </body>

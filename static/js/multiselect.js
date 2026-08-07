@@ -50,8 +50,8 @@ class MultiSelect {
       }
     });
 
-    this.optionsEl.addEventListener('change', (e) => {
-      if (e.target.matches('input[type="checkbox"]')) this._notify();
+    this.optionsEl.addEventListener('change', () => {
+      this._notify();
     });
 
     if (this.searchEl) {

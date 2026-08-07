@@ -134,8 +134,11 @@ def kpis():
         f"""SELECT
                 ROUND(AVG(yield_kg_per_ha), 1)     AS avg_yield,
                 COUNT(DISTINCT state_name)          AS state_count,
+                COUNT(DISTINCT dist_name)           AS district_count,
                 ROUND(AVG(rainfall_mm))             AS avg_rainfall,
                 ROUND(AVG(ph), 2)                   AS avg_ph,
+                ROUND(SUM(area_ha))                 AS total_area,
+                ROUND(AVG(temperature_c), 1)        AS avg_temp,
                 COUNT(*)                            AS record_count
             FROM crop_data {where}""",
         params,
@@ -160,8 +163,11 @@ def kpis():
     return jsonify({
         "avg_yield": row["avg_yield"],
         "state_count": row["state_count"],
+        "district_count": row["district_count"],
         "avg_rainfall": row["avg_rainfall"],
         "avg_ph": row["avg_ph"],
+        "total_area": row["total_area"],
+        "avg_temp": row["avg_temp"],
         "record_count": row["record_count"],
         "yield_delta_pct": yield_delta_pct,
     })
@@ -188,7 +194,7 @@ def yield_trend():
 @api_login_required
 def top_crops():
     db = get_db()
-    where, params = _build_where(exclude=("crop",))
+    where, params = _build_where()
     rows = db.execute(
         f"""SELECT crop, ROUND(AVG(yield_kg_per_ha), 1) AS avg_yield
             FROM crop_data {where}
@@ -285,10 +291,8 @@ def area_growth():
 @api_bp.route("/charts/top-states")
 @api_login_required
 def top_states():
-    """Top 10 states by avg yield — ignores its own state filter so it
-    stays a comparative ranking even when a state happens to be selected."""
     db = get_db()
-    where, params = _build_where(exclude=("state",))
+    where, params = _build_where()
     rows = db.execute(
         f"""SELECT state_name, ROUND(AVG(yield_kg_per_ha), 1) AS avg_yield
             FROM crop_data {where}
@@ -304,10 +308,8 @@ def top_states():
 @api_bp.route("/charts/state-yield")
 @api_login_required
 def state_yield():
-    """Every state (not just top 10) by avg yield, sorted descending —
-    the geographic 'full picture' companion to top-states."""
     db = get_db()
-    where, params = _build_where(exclude=("state",))
+    where, params = _build_where()
     rows = db.execute(
         f"""SELECT state_name, ROUND(AVG(yield_kg_per_ha), 1) AS avg_yield
             FROM crop_data {where}
@@ -320,13 +322,28 @@ def state_yield():
     })
 
 
+@api_bp.route("/charts/state-area")
+@api_login_required
+def state_area():
+    db = get_db()
+    where, params = _build_where()
+    rows = db.execute(
+        f"""SELECT state_name, ROUND(SUM(area_ha)) AS total_area
+            FROM crop_data {where}
+            GROUP BY state_name ORDER BY total_area DESC""",
+        params,
+    ).fetchall()
+    return jsonify({
+        "labels": [r["state_name"] for r in rows],
+        "data": [r["total_area"] for r in rows],
+    })
+
+
 @api_bp.route("/charts/top-districts")
 @api_login_required
 def top_districts():
-    """Top 10 districts by avg yield — ignores its own district filter,
-    same reasoning as top-states."""
     db = get_db()
-    where, params = _build_where(exclude=("district",))
+    where, params = _build_where()
     rows = db.execute(
         f"""SELECT dist_name, state_name, ROUND(AVG(yield_kg_per_ha), 1) AS avg_yield
             FROM crop_data {where}
@@ -395,10 +412,8 @@ def ph_distribution():
 @api_bp.route("/charts/crop-distribution")
 @api_login_required
 def crop_distribution():
-    """Share of total harvested area by crop — ignores its own crop
-    filter for the same comparative reason as top-crops."""
     db = get_db()
-    where, params = _build_where(exclude=("crop",))
+    where, params = _build_where()
     rows = db.execute(
         f"""SELECT crop, ROUND(SUM(area_ha)) AS total_area
             FROM crop_data {where}
@@ -414,14 +429,8 @@ def crop_distribution():
 @api_bp.route("/charts/heatmap")
 @api_login_required
 def heatmap():
-    """State x crop avg-yield matrix, normalized 0-100 within each crop's
-    own column so every crop shows visible variation on the same heatmap
-    even though absolute yields differ hugely between crops (e.g. rice
-    ~1600 kg/ha vs cotton ~260 kg/ha would otherwise make cotton's entire
-    row look flat). Ignores state/crop filters — a heatmap only makes
-    sense across the full grid."""
     db = get_db()
-    where, params = _build_where(exclude=("state", "crop"))
+    where, params = _build_where()
 
     crops = [r["crop"] for r in db.execute("SELECT DISTINCT crop FROM crop_data ORDER BY crop").fetchall()]
     states = [r["state_name"] for r in db.execute(
@@ -528,4 +537,58 @@ def compare():
     return jsonify({
         "crop_a": _crop_summary(db, crop_a),
         "crop_b": _crop_summary(db, crop_b),
+    })
+
+
+@api_bp.route("/map/states")
+@api_login_required
+def map_states():
+    """Per-state summary for the interactive India map: avg yield (used
+    to color the choropleth), avg rainfall/pH, record count, and each
+    state's single highest-yielding crop (used in the click popup).
+    Ignores its own state filter for the same reason /charts/state-yield
+    does — clicking a state should still show it colored on the map
+    alongside its neighbours, not alone."""
+    db = get_db()
+    where, params = _build_where(exclude=("state",))
+
+    rows = db.execute(
+        f"""SELECT state_name,
+                   ROUND(AVG(yield_kg_per_ha), 1) AS avg_yield,
+                   ROUND(AVG(rainfall_mm)) AS avg_rainfall,
+                   ROUND(AVG(ph), 2) AS avg_ph,
+                   COUNT(*) AS record_count
+            FROM crop_data {where}
+            GROUP BY state_name""",
+        params,
+    ).fetchall()
+
+    # SQLite window functions (MAX ... OVER PARTITION BY) need 3.25+; to
+    # stay safe across older SQLite builds this just picks the best row
+    # per state in Python instead of relying on that.
+    crop_rows = db.execute(
+        f"""SELECT state_name, crop, ROUND(AVG(yield_kg_per_ha), 1) AS avg_yield
+            FROM crop_data {where}
+            GROUP BY state_name, crop""",
+        params,
+    ).fetchall()
+    top_crop = {}
+    for r in crop_rows:
+        s = r["state_name"]
+        if s not in top_crop or r["avg_yield"] > top_crop[s][1]:
+            top_crop[s] = (r["crop"], r["avg_yield"])
+
+    return jsonify({
+        "states": [
+            {
+                "state": r["state_name"],
+                "avg_yield": r["avg_yield"],
+                "avg_rainfall": r["avg_rainfall"],
+                "avg_ph": r["avg_ph"],
+                "record_count": r["record_count"],
+                "top_crop": (top_crop[r["state_name"]][0].capitalize()
+                             if r["state_name"] in top_crop else None),
+            }
+            for r in rows
+        ]
     })

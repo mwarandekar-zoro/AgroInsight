@@ -292,8 +292,22 @@
       document.getElementById('kpiYield').textContent = '–';
     }
     document.getElementById('kpiStates').textContent = data.state_count ?? '–';
-    document.getElementById('kpiRain').textContent   = data.avg_rainfall ?? '–';
+    document.getElementById('kpiRain').textContent   = data.avg_rainfall != null ? data.avg_rainfall.toLocaleString() : '–';
     document.getElementById('kpiPh').textContent     = data.avg_ph ?? '–';
+
+    const areaEl = document.getElementById('kpiArea');
+    if (areaEl) {
+      if (data.total_area != null) {
+        window.animateCountUp(areaEl, data.total_area, { compact: true });
+      } else {
+        areaEl.textContent = '–';
+      }
+    }
+
+    const tempEl = document.getElementById('kpiTemp');
+    if (tempEl) {
+      tempEl.textContent = data.avg_temp != null ? `${data.avg_temp}°` : '–';
+    }
 
     const trendEl = document.getElementById('kpiYieldTrend');
     if (data.yield_delta_pct == null) {
@@ -307,38 +321,61 @@
     return data;
   }
 
-  // -------------------------------------------------------
-  // AI Insight card (hero row) — every number here comes straight from
-  // /api/kpis and /api/charts/top-crops, the same live endpoints the KPI
-  // strip and Top Crops chart use. No separate "insight generation"
-  // model — just a plain-language sentence built from real query
-  // results, so it can't say anything the data doesn't actually show.
+  // AI Insight card (hero row) — dynamically responds to filter changes
   // -------------------------------------------------------
   async function refreshAIInsight() {
     const body = document.getElementById('aiInsightBody');
     if (!body) return;
     try {
       const f = currentFilters();
-      const { crop, ...rest } = f;
       const [kpiData, topCrops] = await Promise.all([
         getJSON(`/api/kpis?${qs(f)}`),
-        getJSON(`/api/charts/top-crops?${qs(rest)}`),
+        getJSON(`/api/charts/top-crops?${qs(f)}`),
       ]);
 
+      const filterParts = [];
+      if (f.year) filterParts.push(`Year: ${f.year}`);
+      if (f.crop) filterParts.push(`Crop: ${f.crop}`);
+      if (f.state) filterParts.push(`State: ${f.state}`);
+      if (f.district) filterParts.push(`District: ${f.district}`);
+
       const lines = [];
-      if (topCrops.labels && topCrops.labels.length) {
-        lines.push(`<strong>${topCrops.labels[0]}</strong> leads the current view at ${topCrops.data[0].toLocaleString()} kg/ha average yield.`);
+
+      if (filterParts.length) {
+        lines.push(`<div style="display:inline-block; font-size:11px; font-family:var(--font-mono); background:rgba(34,197,94,0.12); color:var(--primary); padding:3px 10px; border-radius:12px; margin-bottom:8px;">🔍 Active Filter: ${filterParts.join(' • ')}</div>`);
       }
+
+      if (topCrops.labels && topCrops.labels.length) {
+        lines.push(`<strong>${topCrops.labels[0]}</strong> leads the current filtered view with <strong>${topCrops.data[0].toLocaleString()} kg/ha</strong> average yield.`);
+      }
+
       if (kpiData.yield_delta_pct != null) {
         const up = kpiData.yield_delta_pct >= 0;
-        lines.push(`Year-over-year yield is ${up ? 'up' : 'down'} <strong>${Math.abs(kpiData.yield_delta_pct)}%</strong> in the most recent year on record for this view.`);
+        lines.push(`Year-over-year yield momentum is ${up ? 'up' : 'down'} <strong>${up ? '▲' : '▼'} ${Math.abs(kpiData.yield_delta_pct)}%</strong> across the latest recorded period.`);
       }
-      if (kpiData.state_count != null) {
-        lines.push(`Data spans <strong>${kpiData.state_count}</strong> state${kpiData.state_count === 1 ? '' : 's'} at the current filter settings.`);
+
+      if (kpiData.total_area != null && kpiData.total_area > 0) {
+        const distText = kpiData.district_count ? ` across ${kpiData.district_count.toLocaleString()} district${kpiData.district_count === 1 ? '' : 's'}` : '';
+        const stateText = kpiData.state_count ? ` in ${kpiData.state_count} state${kpiData.state_count === 1 ? '' : 's'}` : '';
+        lines.push(`Total harvested land area covers <strong>${kpiData.total_area.toLocaleString()} ha</strong>${distText}${stateText}.`);
+      }
+
+      if (kpiData.avg_rainfall != null || kpiData.avg_temp != null) {
+        const rainStr = kpiData.avg_rainfall != null ? `${kpiData.avg_rainfall} mm rainfall` : '';
+        const tempStr = kpiData.avg_temp != null ? `${kpiData.avg_temp}°C average temp` : '';
+        const envStr = [rainStr, tempStr].filter(Boolean).join(' and ');
+        lines.push(`Environmental conditions reflect <strong>${envStr}</strong>.`);
+      }
+
+      if (kpiData.avg_ph != null) {
+        let phStatus = 'optimal neutral range';
+        if (kpiData.avg_ph < 6.0) phStatus = 'slightly acidic condition (soil conditioning recommended)';
+        else if (kpiData.avg_ph > 7.5) phStatus = 'alkaline condition';
+        lines.push(`Soil pH averages <strong>${kpiData.avg_ph}</strong>, indicating ${phStatus}.`);
       }
 
       body.innerHTML = lines.length
-        ? lines.map((l) => `<p style="margin-bottom:10px;">${l}</p>`).join('')
+        ? lines.map((l) => `<p style="margin-bottom:8px;">${l}</p>`).join('')
         : '<p>Not enough data in the current filter selection to summarize.</p>';
     } catch (err) {
       body.innerHTML = '<p>Insight is unavailable right now.</p>';
@@ -376,9 +413,8 @@
   }
 
   async function refreshTopCrops() {
-    const f       = currentFilters();
-    const { crop, ...rest } = f;
-    const data    = await getJSON(`/api/charts/top-crops?${qs(rest)}`);
+    const f    = currentFilters();
+    const data = await getJSON(`/api/charts/top-crops?${qs(f)}`);
     upsertChart('topCrops', 'topCropsChart', {
       type: 'bar',
       data: {
@@ -621,9 +657,8 @@
   }
 
   async function refreshHeatmap() {
-    const f               = currentFilters();
-    const { state, crop, ...rest } = f;
-    const data            = await getJSON(`/api/charts/heatmap?${qs(rest)}`);
+    const f    = currentFilters();
+    const data = await getJSON(`/api/charts/heatmap?${qs(f)}`);
     const container       = document.getElementById('yieldHeatmap');
     if (!container) return;
 
@@ -642,6 +677,30 @@
     });
     html += '</tbody></table>';
     container.innerHTML = html;
+  }
+
+  async function refreshStateArea() {
+    const f    = currentFilters();
+    const data = await getJSON(`/api/charts/state-area?${qs(f)}`);
+    upsertChart('stateArea', 'stateAreaChart', {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Total area (ha)',
+          data: data.data,
+          backgroundColor: COLOR.accent,
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: commonGrid, y: commonGrid },
+      },
+    }, 'State-wise total area');
   }
 
   // -------------------------------------------------------
@@ -663,6 +722,7 @@
       refreshCropDistribution(),
       refreshStateYield(),
       refreshTopDistricts(),
+      refreshStateArea(),
       refreshHeatmap(),
     ]).catch((err) => console.error('Dashboard refresh failed:', err));
   }

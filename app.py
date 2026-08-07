@@ -12,6 +12,7 @@ from routes.chatbot import assistant_bp
 from routes.reports import reports_bp
 from routes.analyze import analyze_bp
 from routes.weather import weather_bp
+from routes.india_map import india_map_bp
 
 
 def create_app():
@@ -30,6 +31,7 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(analyze_bp)
     app.register_blueprint(weather_bp)
+    app.register_blueprint(india_map_bp)
 
     return app
 

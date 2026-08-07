@@ -14,14 +14,15 @@
       <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌾</span> Crop Advisor</a>
       <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
       <a class="sidebar-link" href="/assistant"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link" href="{{ url_for('india_map.india_map_home') }}"><span class="ic">🗺️</span> India Map</a>
       <a class="sidebar-link" href="/reports"><span class="ic">📄</span> Reports</a>
       <a class="sidebar-link" href="{{ url_for('analyze.analyze_home') }}"><span class="ic">📁</span> Analyze Data</a>
-      <a class="sidebar-link" href="#"><span class="ic">⚙️</span> Settings</a>
+      <a class="sidebar-link" href="#settings"><span class="ic">⚙️</span> Settings</a>
     </nav>
     <div class="sidebar-foot">Signed in as <strong style="color:var(--text-muted);">{{ session.user_name }}</strong><br><a href="{{ url_for("auth.logout") }}" style="color:var(--danger); font-size:12px;">Log out</a></div>
   </aside>
 
-  <div>
+  <div class="main-wrapper">
     <header class="topbar">
       <div class="search-box" id="topbarSearch">
         <span class="search-icon">🔍</span>
@@ -114,26 +115,38 @@
         <button type="button" class="filter-chip reset" id="resetFilters">Reset filters ✕</button>
       </div>
 
-      <div class="kpi-grid">
-        <div class="card kpi-card">
-          <div class="kpi-top"><div class="kpi-icon icon-yield">🌾</div><div class="kpi-trend pos" id="kpiYieldTrend"></div></div>
-          <div class="kpi-value" id="kpiYield">–</div>
-          <div class="kpi-label">Average yield (kg/ha)</div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-top"><div class="kpi-icon icon-map">🗺️</div></div>
-          <div class="kpi-value" id="kpiStates">–</div>
-          <div class="kpi-label">States in view</div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-top"><div class="kpi-icon icon-rain">🌧️</div></div>
-          <div class="kpi-value" id="kpiRain">–</div>
-          <div class="kpi-label">Avg rainfall (mm)</div>
-        </div>
-        <div class="card kpi-card">
-          <div class="kpi-top"><div class="kpi-icon icon-soil">🧪</div></div>
-          <div class="kpi-value" id="kpiPh">–</div>
-          <div class="kpi-label">Avg soil pH</div>
+      <div class="kpi-scroll-container">
+        <div class="kpi-grid">
+          <div class="card kpi-card">
+            <div class="kpi-top"><div class="kpi-icon icon-yield">🌾</div><div class="kpi-trend pos" id="kpiYieldTrend"></div></div>
+            <div class="kpi-value" id="kpiYield">–</div>
+            <div class="kpi-label">Average yield (kg/ha)</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-top"><div class="kpi-icon icon-map">🗺️</div></div>
+            <div class="kpi-value" id="kpiStates">–</div>
+            <div class="kpi-label">States in view</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-top"><div class="kpi-icon icon-rain">🌧️</div></div>
+            <div class="kpi-value" id="kpiRain">–</div>
+            <div class="kpi-label">Avg rainfall (mm)</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-top"><div class="kpi-icon icon-soil">🧪</div></div>
+            <div class="kpi-value" id="kpiPh">–</div>
+            <div class="kpi-label">Avg soil pH</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-top"><div class="kpi-icon icon-area">🚜</div></div>
+            <div class="kpi-value" id="kpiArea">–</div>
+            <div class="kpi-label">Total area (ha)</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-top"><div class="kpi-icon icon-temp">🌡️</div></div>
+            <div class="kpi-value" id="kpiTemp">–</div>
+            <div class="kpi-label">Avg temp (°C)</div>
+          </div>
         </div>
       </div>
 
@@ -189,6 +202,16 @@
             </div>
           </div>
           <div class="chart-wrap tall"><canvas id="topStatesChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-card-head">
+            <h3>Top 10 districts by yield</h3>
+            <div class="chart-card-actions">
+              <div class="icon-btn" title="Fullscreen">⛶</div>
+              <div class="icon-btn" title="Export">⇩</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="topDistrictsChart"></canvas></div>
         </div>
       </div>
 
@@ -274,13 +297,13 @@
         </div>
         <div class="card chart-card">
           <div class="chart-card-head">
-            <h3>Top 10 districts by yield</h3>
+            <h3>State-wise total area</h3>
             <div class="chart-card-actions">
               <div class="icon-btn" title="Fullscreen">⛶</div>
               <div class="icon-btn" title="Export">⇩</div>
             </div>
           </div>
-          <div class="chart-wrap tall"><canvas id="topDistrictsChart"></canvas></div>
+          <div class="chart-wrap tall"><canvas id="stateAreaChart"></canvas></div>
         </div>
       </div>
 

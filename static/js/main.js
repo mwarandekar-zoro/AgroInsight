@@ -234,6 +234,126 @@ document.addEventListener('DOMContentLoaded', () => {
     weatherPanel.addEventListener('click', (e) => e.stopPropagation());
     document.addEventListener('click', () => { weatherPanel.hidden = true; });
   }
+
+  // -------------------------------------------------------
+  // Settings Modal & Preferences Manager
+  // -------------------------------------------------------
+  const settingsModal = document.getElementById('settingsModal');
+  const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+  const settingsToast = document.getElementById('settingsToast');
+
+  function showToast(msg) {
+    if (!settingsToast) return;
+    settingsToast.textContent = msg || 'Settings saved successfully!';
+    settingsToast.hidden = false;
+    setTimeout(() => { settingsToast.hidden = true; }, 2800);
+  }
+
+  function openSettingsModal() {
+    if (!settingsModal) return;
+    // Load current saved values from localStorage
+    try {
+      const yieldUnit = localStorage.getItem('agroinsight-yield-unit') || 'kg_ha';
+      const tempUnit = localStorage.getItem('agroinsight-temp-unit') || 'celsius';
+      const autoRefresh = localStorage.getItem('agroinsight-auto-refresh') !== 'false';
+      const currentTheme = localStorage.getItem('agroinsight-theme') || (document.documentElement.classList.contains('light-theme') ? 'light' : 'dark');
+
+      const yieldInput = document.getElementById('settingYieldUnit');
+      const tempInput = document.getElementById('settingTempUnit');
+      const autoRefreshInput = document.getElementById('settingAutoRefresh');
+      if (yieldInput) yieldInput.value = yieldUnit;
+      if (tempInput) tempInput.value = tempUnit;
+      if (autoRefreshInput) autoRefreshInput.checked = autoRefresh;
+
+      const themeRadios = document.querySelectorAll('input[name="settingsTheme"]');
+      themeRadios.forEach((r) => { r.checked = (r.value === currentTheme); });
+    } catch (e) { /* ignore */ }
+
+    settingsModal.hidden = false;
+  }
+
+  function closeSettingsModal() {
+    if (settingsModal) settingsModal.hidden = true;
+  }
+
+  // Bind settings link triggers anywhere on the page
+  document.querySelectorAll('a[href="#settings"], .sidebar-link').forEach((link) => {
+    if (link.getAttribute('href') === '#settings' || link.textContent.includes('Settings')) {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        openSettingsModal();
+      });
+    }
+  });
+
+  if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsModal);
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) closeSettingsModal();
+    });
+  }
+
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.settings-tab-btn');
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.getAttribute('data-tab');
+      tabBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('.settings-tab-pane').forEach((pane) => {
+        pane.classList.toggle('active', pane.id === `tab-${tabId}`);
+      });
+    });
+  });
+
+  // Save Settings
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', () => {
+      try {
+        const yieldUnit = document.getElementById('settingYieldUnit')?.value || 'kg_ha';
+        const tempUnit = document.getElementById('settingTempUnit')?.value || 'celsius';
+        const autoRefresh = document.getElementById('settingAutoRefresh')?.checked ?? true;
+
+        const selectedThemeRadio = document.querySelector('input[name="settingsTheme"]:checked');
+        const newTheme = selectedThemeRadio ? selectedThemeRadio.value : 'dark';
+
+        localStorage.setItem('agroinsight-yield-unit', yieldUnit);
+        localStorage.setItem('agroinsight-temp-unit', tempUnit);
+        localStorage.setItem('agroinsight-auto-refresh', String(autoRefresh));
+
+        const oldTheme = localStorage.getItem('agroinsight-theme');
+        localStorage.setItem('agroinsight-theme', newTheme);
+
+        closeSettingsModal();
+        showToast('Settings saved successfully!');
+
+        if (oldTheme !== newTheme) {
+          setTimeout(() => { window.location.reload(); }, 400);
+        }
+      } catch (e) {
+        showToast('Settings saved locally.');
+        closeSettingsModal();
+      }
+    });
+  }
+
+  // Reset Settings
+  if (resetSettingsBtn) {
+    resetSettingsBtn.addEventListener('click', () => {
+      try {
+        localStorage.removeItem('agroinsight-yield-unit');
+        localStorage.removeItem('agroinsight-temp-unit');
+        localStorage.removeItem('agroinsight-auto-refresh');
+        localStorage.removeItem('agroinsight-theme');
+      } catch (e) { /* ignore */ }
+      closeSettingsModal();
+      showToast('Settings reset to default!');
+      setTimeout(() => { window.location.reload(); }, 400);
+    });
+  }
 });
 
 // Count-up animation for headline numbers (KPI cards etc). Exposed on
@@ -250,10 +370,17 @@ window.animateCountUp = function animateCountUp(el, endValue, opts) {
   const duration = options.duration ?? 700;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const format = (n) => n.toLocaleString(undefined, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
+  const format = (n) => {
+    if (options.compact) {
+      if (n >= 1000000000) return (n / 1000000000).toFixed(2).replace(/\.00$/, '') + 'B';
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(0) + 'k';
+    }
+    return n.toLocaleString(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+  };
 
   if (reduceMotion) {
     el.textContent = format(endValue);

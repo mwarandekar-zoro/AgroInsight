@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}AI Assistant — AgroInsight AI{% endblock %}
+{% block title %}India Map — AgroInsight AI{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/india_map.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -14,8 +15,8 @@
       <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
       <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌾</span> Crop Advisor</a>
       <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
-      <a class="sidebar-link active" href="{{ url_for('assistant.assistant_home') }}"><span class="ic">🤖</span> AI Assistant</a>
-      <a class="sidebar-link" href="{{ url_for('india_map.india_map_home') }}"><span class="ic">🗺️</span> India Map</a>
+      <a class="sidebar-link" href="/assistant"><span class="ic">🤖</span> AI Assistant</a>
+      <a class="sidebar-link active" href="{{ url_for('india_map.india_map_home') }}"><span class="ic">🗺️</span> India Map</a>
       <a class="sidebar-link" href="/reports"><span class="ic">📄</span> Reports</a>
       <a class="sidebar-link" href="{{ url_for('analyze.analyze_home') }}"><span class="ic">📁</span> Analyze Data</a>
       <a class="sidebar-link" href="#settings"><span class="ic">⚙️</span> Settings</a>
@@ -50,34 +51,36 @@
       </div>
     </header>
 
-    <main class="main-content assistant-main">
+    <main class="main-content">
       <div class="page-head">
         <div>
-          <h1>AI Assistant</h1>
-          <p class="sub">Ask about crops, states, or yields — answers are grounded in the live dataset, not made up.</p>
+          <h1>India Map</h1>
+          <p class="sub">Colored by average yield across the filtered dataset. Click a state to open the dashboard filtered to it.</p>
         </div>
       </div>
 
-      <div class="card chat-panel">
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg bot">
-            <div class="chat-avatar bot">🤖</div>
-            <div class="chat-bubble">
-              Hi! Ask me something like <em>"best crop for Punjab"</em> or <em>"compare rice and cotton"</em>.
-            </div>
+      <div class="map-layout">
+        <div class="card map-card">
+          <div id="indiaMap"></div>
+          <div class="map-legend" id="mapLegend">
+            <span class="map-legend-label">Lower yield</span>
+            <div class="map-legend-scale" id="mapLegendScale"></div>
+            <span class="map-legend-label">Higher yield</span>
           </div>
         </div>
 
-        <div class="chat-suggestions" id="chatSuggestions">
-          {% for ex in examples %}
-          <button type="button" class="chat-chip" data-prompt="{{ ex }}">{{ ex }}</button>
-          {% endfor %}
+        <div class="card map-side-card">
+          <div class="map-side-head">
+            <span class="ic">📍</span>
+            <h3 id="mapSideTitle">Hover a state</h3>
+          </div>
+          <div id="mapSideBody" class="map-side-body">
+            <p class="empty-note">Hover any shaded state on the map to preview its stats here, or click it to open the full dashboard filtered to that state.</p>
+          </div>
+          <div class="map-side-note" id="mapUncoveredNote" hidden>
+            Grayed-out states/UTs aren't covered by this dataset (20 states, 311 districts).
+          </div>
         </div>
-
-        <form class="chat-input-row" id="chatForm">
-          <input type="text" id="chatInput" placeholder="Ask about a crop, state, or comparison…" maxlength="300" autocomplete="off">
-          <button type="submit" class="btn btn-primary btn-sm" id="chatSend">Send</button>
-        </form>
       </div>
     </main>
   </div>
@@ -85,6 +88,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>window.CURRENT_USER_INITIAL = "{{ session.user_name[0]|upper }}";</script>
-<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ url_for('static', filename='js/india_map.js') }}"></script>
 {% endblock %}

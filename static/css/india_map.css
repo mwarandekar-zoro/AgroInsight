@@ -1,0 +1,106 @@
+/* ============================================================
+   India Map page
+   ============================================================ */
+
+.map-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.map-card { padding: 16px; }
+#indiaMap {
+  height: 620px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+}
+
+.map-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 0 6px;
+}
+.map-legend-label { font-size: 11.5px; color: var(--text-faint); white-space: nowrap; }
+.map-legend-scale {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #16321F, #1E5631, #22C55E, #6EE7A8);
+  border: 1px solid var(--border);
+}
+
+.map-side-card { padding: 20px; position: sticky; top: 100px; }
+.map-side-head { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.map-side-head .ic { font-size: 17px; }
+.map-side-head h3 { font-size: 15px; }
+
+.map-side-body .empty-note { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; }
+
+.map-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+.map-stat-row:last-of-type { border-bottom: none; }
+.map-stat-row .label { color: var(--text-muted); }
+.map-stat-row .value { color: var(--text); font-family: var(--font-mono); font-weight: 600; }
+
+.map-side-cta {
+  margin-top: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.map-side-note {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+/* ---------- Leaflet theme overrides ---------- */
+.leaflet-container {
+  background: var(--bg-raised);
+  font-family: var(--font-body);
+  border-radius: var(--radius-sm);
+}
+.leaflet-tooltip {
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  font-size: 12.5px;
+  padding: 8px 10px;
+}
+.leaflet-tooltip-top:before { border-top-color: var(--border-strong); }
+.leaflet-control-zoom a {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.leaflet-control-zoom a:hover { background: var(--card-hover) !important; }
+.leaflet-control-attribution {
+  background: rgba(17,24,39,0.7) !important;
+  color: var(--text-faint) !important;
+}
+.leaflet-control-attribution a { color: var(--text-muted) !important; }
+
+.state-shape { cursor: pointer; transition: filter 0.12s ease; }
+.state-shape:hover { filter: brightness(1.15); }
+.state-shape.no-data { cursor: default; }
+.state-shape.no-data:hover { filter: none; }
+
+@media (max-width: 1100px) {
+  .map-layout { grid-template-columns: 1fr; }
+  .map-side-card { position: static; }
+  #indiaMap { height: 460px; }
+}

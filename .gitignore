@@ -10,6 +10,9 @@ ENV/
 
 # Database
 database/*.db
+database/*.db-journal
+database/*.db-shm
+database/*.db-wal
 database/*.sqlite3
 
 # Machine Learning models (often large and generated)

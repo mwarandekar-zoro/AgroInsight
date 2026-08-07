@@ -1,23 +1,26 @@
-# AgriInsight AI 🌾
+# AgroInsight AI 🌾
 
 **Smart Agriculture Analytics & Recommendation Platform**
 
-AgriInsight AI is a comprehensive web-based platform designed to provide data-driven agricultural insights. Built with **Flask, SQLite, and Chart.js**, it features real-time data visualization, machine learning-based crop recommendations, and an intelligent AI assistant to query historical crop data.
+AgroInsight AI is a comprehensive web-based platform designed to provide data-driven agricultural insights. Built with **Flask, SQLite, and Chart.js**, it features real-time data visualization, machine learning-based crop recommendations, and an intelligent AI assistant to query historical crop data.
 
 ## 🚀 Features
 
-- **Interactive Dashboard:** 13 live Chart.js visualizations covering yield analysis, weather impacts, soil/crop metrics, and geographic distributions.
+- **Interactive Dashboard:** 14 live Chart.js visualizations covering yield analysis, weather impacts, soil/crop metrics, and geographic distributions. Fully reactive filters immediately update all 6 KPIs and 14 graphs.
+- **Interactive India Map:** A Leaflet-based choropleth showing state-level yield distributions. Click any state to drill down into the dashboard filtered to that state.
+- **Dynamic AI Insights:** Real-time summary metrics generated dynamically based on active filter selections.
 - **ML Crop Recommendation:** Built-in Random Forest models that recommend the most suitable crop and predict expected yield based on soil N/P/K, temperature, humidity, pH, and rainfall.
-- **AI Assistant:** A dedicated rule-based AI chatbot capable of answering queries directly from the agricultural database without hallucination risks.
+- **AI Assistant:** A dedicated AI chatbot capable of answering queries directly from the agricultural database.
 - **Crop Comparison:** Side-by-side comparative analysis of different crops, highlighting climate requirements and yield trends.
+- **Application Settings:** Preferences panel to customize yield display units (kg/ha, t/ha, q/ha), temperature display (°C, °F), themes, auto-refresh, and notification alerts.
 - **Advanced Reporting:** Export filtered data instantly to PDF summaries, Excel, or CSV formats.
 - **User Authentication:** Secure session-based authentication with Werkzeug password hashing.
-- **Responsive UI:** Fully responsive design with a seamless Light/Dark mode toggle.
+- **Responsive UI:** Modern responsive design with light/dark theme preference persistence.
 
 ## 🛠️ Tech Stack
 
 - **Backend:** Python, Flask, SQLite
-- **Frontend:** HTML, Vanilla CSS, JavaScript, Chart.js (locally bundled)
+- **Frontend:** HTML, Vanilla CSS, JavaScript, Chart.js, Leaflet (locally bundled for offline functionality)
 - **Machine Learning:** scikit-learn, pandas
 
 ## ⚙️ Setup and Installation
