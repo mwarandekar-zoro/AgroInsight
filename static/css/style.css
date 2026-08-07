@@ -5,13 +5,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* Color */
+  /* Color — matches the Priority-1 design spec palette exactly */
   --bg: #0B1220;
-  --bg-raised: #0E1626;
-  --card: #111827;
-  --card-hover: #151F30;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
+  --bg-raised: #111827;      /* sidebar / topbar / dropdown surfaces */
+  --card: #1F2937;           /* one step lighter than the sidebar, so cards read as elevated surfaces sitting on top of the shell instead of blending into it */
+  --card-hover: #26313F;
+  --border: #2D3748;
+  --border-strong: #3D4C61;
 
   --primary: #22C55E;
   --primary-dim: #16A34A;
@@ -21,7 +21,7 @@
   --warning: #F59E0B;
   --danger: #EF4444;
 
-  --text: #E7EBF3;
+  --text: #F8FAFC;
   --text-muted: #94A3B8;
   --text-faint: #5B6779;
 
@@ -224,6 +224,8 @@ img { max-width: 100%; display: block; }
   white-space: nowrap;
 }
 .btn:active { transform: scale(0.97); }
+.btn:hover { transform: scale(1.03); }
+.btn:active:hover { transform: scale(0.97); }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dim) 100%);
@@ -249,9 +251,10 @@ img { max-width: 100%; display: block; }
   border: 1px solid var(--border);
   cursor: pointer;
   font-size: 15px;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
-.icon-btn:hover { background: rgba(255,255,255,0.07); }
+.icon-btn:hover { background: rgba(255,255,255,0.07); transform: scale(1.08); }
+.icon-btn:active { transform: scale(0.94); }
 
 /* ---------- Glass card ---------- */
 .glass {

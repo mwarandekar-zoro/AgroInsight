@@ -286,7 +286,11 @@
     const f    = currentFilters();
     const data = await getJSON(`/api/kpis?${qs(f)}`);
 
-    document.getElementById('kpiYield').textContent  = data.avg_yield  != null ? data.avg_yield.toLocaleString() : '–';
+    if (data.avg_yield != null) {
+      window.animateCountUp(document.getElementById('kpiYield'), data.avg_yield, { decimals: 0 });
+    } else {
+      document.getElementById('kpiYield').textContent = '–';
+    }
     document.getElementById('kpiStates').textContent = data.state_count ?? '–';
     document.getElementById('kpiRain').textContent   = data.avg_rainfall ?? '–';
     document.getElementById('kpiPh').textContent     = data.avg_ph ?? '–';
@@ -299,6 +303,45 @@
       const up = data.yield_delta_pct >= 0;
       trendEl.textContent = `${up ? '▲' : '▼'} ${Math.abs(data.yield_delta_pct)}%`;
       trendEl.className   = `kpi-trend ${up ? 'pos' : 'neg'}`;
+    }
+    return data;
+  }
+
+  // -------------------------------------------------------
+  // AI Insight card (hero row) — every number here comes straight from
+  // /api/kpis and /api/charts/top-crops, the same live endpoints the KPI
+  // strip and Top Crops chart use. No separate "insight generation"
+  // model — just a plain-language sentence built from real query
+  // results, so it can't say anything the data doesn't actually show.
+  // -------------------------------------------------------
+  async function refreshAIInsight() {
+    const body = document.getElementById('aiInsightBody');
+    if (!body) return;
+    try {
+      const f = currentFilters();
+      const { crop, ...rest } = f;
+      const [kpiData, topCrops] = await Promise.all([
+        getJSON(`/api/kpis?${qs(f)}`),
+        getJSON(`/api/charts/top-crops?${qs(rest)}`),
+      ]);
+
+      const lines = [];
+      if (topCrops.labels && topCrops.labels.length) {
+        lines.push(`<strong>${topCrops.labels[0]}</strong> leads the current view at ${topCrops.data[0].toLocaleString()} kg/ha average yield.`);
+      }
+      if (kpiData.yield_delta_pct != null) {
+        const up = kpiData.yield_delta_pct >= 0;
+        lines.push(`Year-over-year yield is ${up ? 'up' : 'down'} <strong>${Math.abs(kpiData.yield_delta_pct)}%</strong> in the most recent year on record for this view.`);
+      }
+      if (kpiData.state_count != null) {
+        lines.push(`Data spans <strong>${kpiData.state_count}</strong> state${kpiData.state_count === 1 ? '' : 's'} at the current filter settings.`);
+      }
+
+      body.innerHTML = lines.length
+        ? lines.map((l) => `<p style="margin-bottom:10px;">${l}</p>`).join('')
+        : '<p>Not enough data in the current filter selection to summarize.</p>';
+    } catch (err) {
+      body.innerHTML = '<p>Insight is unavailable right now.</p>';
     }
   }
 
@@ -607,6 +650,7 @@
   async function refreshAll() {
     await Promise.all([
       refreshKPIs(),
+      refreshAIInsight(),
       refreshYieldTrend(),
       refreshAreaGrowth(),
       refreshTopCrops(),

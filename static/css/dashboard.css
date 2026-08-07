@@ -30,14 +30,16 @@
   color: var(--text-muted);
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, padding-left 0.15s ease;
 }
 .sidebar-link .ic { font-size: 16px; width: 20px; text-align: center; }
-.sidebar-link:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.sidebar-link:hover { background: rgba(255,255,255,0.04); color: var(--text); padding-left: 18px; }
 .sidebar-link.active {
   background: linear-gradient(135deg, rgba(34,197,94,0.14), rgba(59,130,246,0.08));
   color: var(--text);
   border: 1px solid rgba(34,197,94,0.22);
+  border-left: 3px solid var(--primary);
+  padding-left: 12px;
 }
 .sidebar-foot {
   border-top: 1px solid var(--border);
@@ -179,6 +181,76 @@
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-weight: 700; font-size: 14px;
 }
+
+/* ---------- Weather widget ---------- */
+.weather-badge {
+  position: absolute;
+  bottom: -3px; right: -6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 4px;
+  line-height: 14px;
+}
+.weather-panel { width: 240px; }
+.weather-body { padding: 14px; }
+.weather-body .weather-loading,
+.weather-body .weather-error { color: var(--text-muted); text-align: center; padding: 8px 0; }
+.weather-reading { display: flex; align-items: center; gap: 14px; }
+.weather-icon { font-size: 32px; line-height: 1; }
+.weather-temp { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--text); }
+.weather-condition { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.weather-wind { font-size: 11.5px; color: var(--text-faint); margin-top: 8px; }
+
+/* ---------- AI Insight card (hero row) ---------- */
+.hero-row {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.hero-row .chart-wrap { height: 300px; }
+.ai-insight-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(165deg, rgba(34,197,94,0.09), rgba(59,130,246,0.05));
+  border-color: rgba(34,197,94,0.18);
+}
+.ai-insight-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.ai-insight-head .ic { font-size: 17px; }
+.ai-insight-head h3 { font-size: 14.5px; }
+.ai-insight-body { flex: 1; font-size: 14px; color: var(--text); line-height: 1.6; }
+.ai-insight-body strong { color: var(--primary); }
+.ai-insight-body .skeleton { height: 14px; margin-bottom: 8px; }
+.ai-insight-foot { margin-top: 16px; font-size: 12px; color: var(--text-faint); }
+
+@media (max-width: 1100px) {
+  .hero-row { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   Entrance animations — staggered fade for KPI cards, slide
+   for chart cards. Triggered via IntersectionObserver in
+   main.js by adding the `in-view` class; respects
+   prefers-reduced-motion globally via style.css.
+   ========================================================= */
+.kpi-card,
+.chart-card,
+.ai-insight-card {
+  opacity: 0;
+}
+.kpi-card { transform: translateY(10px); transition: opacity 0.45s ease, transform 0.45s ease; }
+.kpi-card.in-view { opacity: 1; transform: translateY(0); }
+
+.chart-card,
+.ai-insight-card { transform: translateY(26px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.chart-card.in-view,
+.ai-insight-card.in-view { opacity: 1; transform: translateY(0); }
 
 /* ---------- Main content ---------- */
 .main-content { padding: 28px; }

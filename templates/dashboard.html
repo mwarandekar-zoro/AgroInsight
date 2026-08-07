@@ -11,7 +11,7 @@
     <nav class="sidebar-nav">
       <a class="sidebar-link active" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📊</span> Dashboard</a>
       <a class="sidebar-link" href="{{ url_for('dashboard.dashboard_home') }}"><span class="ic">📈</span> Analytics</a>
-      <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌱</span> Recommendation</a>
+      <a class="sidebar-link" href="{{ url_for('recommendation.recommendation_home') }}"><span class="ic">🌾</span> Crop Advisor</a>
       <a class="sidebar-link" href="{{ url_for('compare.compare_home') }}"><span class="ic">⚖️</span> Compare</a>
       <a class="sidebar-link" href="/assistant"><span class="ic">🤖</span> AI Assistant</a>
       <a class="sidebar-link" href="/reports"><span class="ic">📄</span> Reports</a>
@@ -29,6 +29,13 @@
         <div class="search-results" id="topbarSearchResults"></div>
       </div>
       <div class="topbar-actions">
+        <div class="icon-btn" id="weatherBtn" title="Weather">
+          🌤<span class="weather-badge" id="weatherBadge" hidden></span>
+          <div class="notif-panel weather-panel" id="weatherPanel" hidden>
+            <div class="notif-panel-head">Weather — New Delhi</div>
+            <div class="weather-body" id="weatherBody">Loading…</div>
+          </div>
+        </div>
         <div class="icon-btn" title="Toggle theme">🌙</div>
         <div class="icon-btn" id="notifBtn" title="Notifications">
           🔔<span class="badge" id="notifBadge" hidden></span>
@@ -131,7 +138,7 @@
       </div>
 
       <h2 class="chart-section-title">Yield Analysis</h2>
-      <div class="chart-grid">
+      <div class="hero-row">
         <div class="card chart-card">
           <div class="chart-card-head">
             <h3>Year-wise yield trend</h3>
@@ -142,6 +149,17 @@
           </div>
           <div class="chart-wrap"><canvas id="yieldTrendChart"></canvas></div>
         </div>
+        <div class="card ai-insight-card">
+          <div class="ai-insight-head"><span class="ic">🤖</span><h3>AI Insight</h3></div>
+          <div class="ai-insight-body" id="aiInsightBody">
+            <div class="skeleton" style="width:90%;"></div>
+            <div class="skeleton" style="width:70%;"></div>
+            <div class="skeleton" style="width:80%;"></div>
+          </div>
+          <div class="ai-insight-foot">Generated from the live filtered dataset — not a separate model.</div>
+        </div>
+      </div>
+      <div class="chart-grid">
         <div class="card chart-card">
           <div class="chart-card-head">
             <h3>Area harvested growth</h3>

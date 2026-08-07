@@ -1,7 +1,12 @@
 // AgroInsight AI — shared front-end behaviour
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Reveal feature cards / insight cards as they scroll into view
+  // Reveal feature cards / insight cards (landing page) and KPI/chart/AI
+  // insight cards (dashboard-style pages) as they scroll into view.
+  // Landing-page cards use main.js's own inline fade; dashboard cards use
+  // the `in-view` CSS class defined in dashboard.css (fade for KPI cards,
+  // a more pronounced slide for chart cards) so both look intentional
+  // rather than just "everything fades the same way".
   const revealTargets = document.querySelectorAll('.feature-card, .insight-card');
   if (revealTargets.length && 'IntersectionObserver' in window) {
     revealTargets.forEach((el) => {
@@ -19,6 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { threshold: 0.15 });
     revealTargets.forEach((el) => io.observe(el));
+  }
+
+  const dashTargets = document.querySelectorAll('.kpi-card, .chart-card, .ai-insight-card');
+  if (dashTargets.length && 'IntersectionObserver' in window) {
+    // Stagger by DOM order so cards in the same grid cascade in rather
+    // than popping simultaneously — capped so long chart lists (13
+    // charts on /dashboard) don't end up with a multi-second tail delay.
+    dashTargets.forEach((el, i) => {
+      el.style.transitionDelay = `${Math.min(i, 8) * 45}ms`;
+    });
+    const dashIo = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          dashIo.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    dashTargets.forEach((el) => dashIo.observe(el));
   }
 
   // Theme toggle (dashboard topbar) — persisted so it survives page loads,
@@ -170,4 +194,81 @@ document.addEventListener('DOMContentLoaded', () => {
     notifPanel.addEventListener('click', (e) => e.stopPropagation());
     document.addEventListener('click', () => { notifPanel.hidden = true; });
   }
+
+  // Weather widget — live current conditions for New Delhi via
+  // routes/weather.py (Open-Meteo, no API key). Fetched once on load so
+  // the badge is populated before the person even opens the panel;
+  // clicking just toggles the already-fetched detail. If the request
+  // fails (no internet, Open-Meteo down) this shows an honest
+  // "unavailable" message rather than a fabricated reading.
+  const weatherBtn = document.getElementById('weatherBtn');
+  const weatherPanel = document.getElementById('weatherPanel');
+  const weatherBody = document.getElementById('weatherBody');
+  const weatherBadge = document.getElementById('weatherBadge');
+  if (weatherBtn && weatherPanel && weatherBody) {
+    fetch('/api/weather')
+      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((data) => {
+        if (weatherBadge) {
+          weatherBadge.textContent = `${Math.round(data.temperature_c)}°`;
+          weatherBadge.hidden = false;
+        }
+        weatherBody.innerHTML = `
+          <div class="weather-reading">
+            <div class="weather-icon">${data.icon}</div>
+            <div>
+              <div class="weather-temp">${Math.round(data.temperature_c)}°C</div>
+              <div class="weather-condition">${data.condition}</div>
+            </div>
+          </div>
+          <div class="weather-wind">Wind ${Math.round(data.wind_kmh)} km/h · ${data.location}</div>`;
+      })
+      .catch(() => {
+        weatherBody.innerHTML = '<div class="weather-error">Weather is unavailable right now.</div>';
+      });
+
+    weatherBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      weatherPanel.hidden = !weatherPanel.hidden;
+    });
+    weatherPanel.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('click', () => { weatherPanel.hidden = true; });
+  }
 });
+
+// Count-up animation for headline numbers (KPI cards etc). Exposed on
+// window so charts.js (loaded after this file, dashboard-only) can
+// reuse it without duplicating the easing/formatting logic. Respects
+// prefers-reduced-motion by jumping straight to the end value.
+window.animateCountUp = function animateCountUp(el, endValue, opts) {
+  if (!el || endValue == null || Number.isNaN(endValue)) {
+    if (el) el.textContent = endValue == null ? '–' : String(endValue);
+    return;
+  }
+  const options = opts || {};
+  const decimals = options.decimals ?? 0;
+  const duration = options.duration ?? 700;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const format = (n) => n.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+
+  if (reduceMotion) {
+    el.textContent = format(endValue);
+    return;
+  }
+
+  const startValue = parseFloat((el.textContent || '0').replace(/,/g, '')) || 0;
+  const startTime = performance.now();
+
+  function tick(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+    const current = startValue + (endValue - startValue) * eased;
+    el.textContent = format(current);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+};
