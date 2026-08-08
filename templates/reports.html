@@ -59,32 +59,60 @@
       </div>
 
       <div class="filter-bar glass">
-        <div class="filter-select">
+        <div class="filter-select multiselect" id="filterYear" data-key="year">
           <span class="label">Year</span>
-          <select id="filterYear">
-            <option value="all">All years</option>
-            {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
-          </select>
+          <button type="button" class="ms-trigger"><span class="ms-trigger-text">All years</span><span class="ms-trigger-caret">⌄</span></button>
+          <div class="ms-panel">
+            <input class="ms-search" type="text" placeholder="Search years…">
+            <div class="ms-actions">
+              <button type="button" data-action="all">Select all</button>
+              <button type="button" data-action="clear">Clear</button>
+            </div>
+            <div class="ms-options">
+              {% for y in years %}<label class="ms-option"><input type="checkbox" value="{{ y }}"> {{ y }}</label>{% endfor %}
+            </div>
+          </div>
         </div>
-        <div class="filter-select">
+        <div class="filter-select multiselect" id="filterCrop" data-key="crop">
           <span class="label">Crop</span>
-          <select id="filterCrop">
-            <option value="all">All crops</option>
-            {% for c in crops %}<option value="{{ c }}">{{ c|capitalize }}</option>{% endfor %}
-          </select>
+          <button type="button" class="ms-trigger"><span class="ms-trigger-text">All crops</span><span class="ms-trigger-caret">⌄</span></button>
+          <div class="ms-panel">
+            <div class="ms-actions">
+              <button type="button" data-action="all">Select all</button>
+              <button type="button" data-action="clear">Clear</button>
+            </div>
+            <div class="ms-options">
+              {% for c in crops %}<label class="ms-option"><input type="checkbox" value="{{ c }}"> {{ c|capitalize }}</label>{% endfor %}
+            </div>
+          </div>
         </div>
-        <div class="filter-select">
+        <div class="filter-select multiselect" id="filterState" data-key="state">
           <span class="label">State</span>
-          <select id="filterState">
-            <option value="all">All states</option>
-            {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
-          </select>
+          <button type="button" class="ms-trigger"><span class="ms-trigger-text">All states</span><span class="ms-trigger-caret">⌄</span></button>
+          <div class="ms-panel">
+            <input class="ms-search" type="text" placeholder="Search states…">
+            <div class="ms-actions">
+              <button type="button" data-action="all">Select all</button>
+              <button type="button" data-action="clear">Clear</button>
+            </div>
+            <div class="ms-options">
+              {% for s in states %}<label class="ms-option"><input type="checkbox" value="{{ s }}"> {{ s }}</label>{% endfor %}
+            </div>
+          </div>
         </div>
-        <div class="filter-select">
+        <div class="filter-select multiselect" id="filterDistrict" data-key="district">
           <span class="label">District</span>
-          <select id="filterDistrict">
-            <option value="all">All districts</option>
-          </select>
+          <button type="button" class="ms-trigger"><span class="ms-trigger-text">All districts</span><span class="ms-trigger-caret">⌄</span></button>
+          <div class="ms-panel">
+            <input class="ms-search" type="text" placeholder="Search districts…">
+            <div class="ms-actions">
+              <button type="button" data-action="all">Select all</button>
+              <button type="button" data-action="clear">Clear</button>
+            </div>
+            <div class="ms-options">
+              <!-- populated dynamically -->
+            </div>
+          </div>
         </div>
         <button type="button" class="filter-chip reset" id="resetFilters">Reset filters ✕</button>
       </div>
@@ -116,14 +144,20 @@
         <h3>Export current view</h3>
         <p class="export-sub">CSV and Excel give you the full filtered row-level data. PDF gives a formatted summary report instead of a raw dump.</p>
         <div class="export-actions">
-          <a href="#" id="exportCsv" class="btn btn-ghost export-btn">
-            <span class="export-icon">📄</span> CSV <span class="export-tag">raw data</span>
+          <a href="#" id="exportCsv" class="export-btn">
+            <span class="export-icon">📄</span>
+            <span class="export-title">CSV</span>
+            <span class="export-tag">raw data</span>
           </a>
-          <a href="#" id="exportExcel" class="btn btn-ghost export-btn">
-            <span class="export-icon">📊</span> Excel <span class="export-tag">raw data</span>
+          <a href="#" id="exportExcel" class="export-btn">
+            <span class="export-icon">📊</span>
+            <span class="export-title">Excel</span>
+            <span class="export-tag">raw data</span>
           </a>
-          <a href="#" id="exportPdf" class="btn btn-primary export-btn">
-            <span class="export-icon">📑</span> PDF <span class="export-tag">summary report</span>
+          <a href="#" id="exportPdf" class="export-btn">
+            <span class="export-icon">📑</span>
+            <span class="export-title">PDF</span>
+            <span class="export-tag">summary report</span>
           </a>
         </div>
       </div>
@@ -133,5 +167,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/multiselect.js') }}"></script>
 <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
 {% endblock %}

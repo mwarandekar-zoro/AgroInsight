@@ -47,6 +47,10 @@
   border-left: 3px solid var(--primary);
   padding-left: 12px;
 }
+.sidebar-link.active:hover {
+  background: linear-gradient(135deg, rgba(34,197,94,0.20), rgba(59,130,246,0.12));
+  padding-left: 14px;
+}
 .sidebar-foot {
   border-top: 1px solid var(--border);
   padding-top: 14px;
@@ -81,8 +85,13 @@
   color: var(--text-faint);
   font-size: 13.5px;
   position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
-.search-box:focus-within { border-color: rgba(34,197,94,0.4); }
+.search-box:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
 .search-box .search-icon { flex: 0 0 auto; }
 .search-box input {
   flex: 1 1 auto;
@@ -542,6 +551,11 @@ html.light-theme .sidebar-link.active {
   padding-left: 11px; /* -3px to offset the new left border, keeps icon/text aligned with inactive links */
   color: var(--primary-dim);
   font-weight: 600;
+  transition: background 0.15s ease, padding-left 0.15s ease;
+}
+html.light-theme .sidebar-link.active:hover {
+  background: rgba(21,128,61,0.12);
+  padding-left: 13px;
 }
 html.light-theme .sidebar-foot { border-top-color: var(--border); }
 
@@ -557,6 +571,11 @@ html.light-theme .search-box:hover {
   background: #FFFFFF;
   border-color: var(--border-strong);
   box-shadow: var(--shadow-sm);
+}
+html.light-theme .search-box:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+  background: #FFFFFF !important;
 }
 html.light-theme .avatar { box-shadow: 0 2px 8px rgba(21,128,61,0.3); }
 

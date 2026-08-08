@@ -13,19 +13,33 @@
 .compare-select { display: flex; flex-direction: column; gap: 8px; align-items: center; }
 .compare-select .label { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
 .compare-select select {
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border-strong);
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
   color: var(--text);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
-  min-width: 150px;
-  text-align: center;
+  min-width: 180px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
 }
-.compare-select select:focus { outline: none; border-color: var(--primary); }
+.compare-select select:hover {
+  border-color: var(--border-strong);
+  background-color: rgba(255,255,255,0.06);
+}
+.compare-select select:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
 .compare-vs {
   font-family: var(--font-mono);
   font-size: 13px;

@@ -1,12 +1,16 @@
 // AgroInsight AI — reports page
 
 (function () {
-  const yearSel = document.getElementById('filterYear');
-  if (!yearSel) return;
+  const yearMS = document.getElementById('filterYear');
+  if (!yearMS) return;
 
-  const cropSel = document.getElementById('filterCrop');
-  const stateSel = document.getElementById('filterState');
-  const districtSel = document.getElementById('filterDistrict');
+  const filterMS = {
+    year:     new MultiSelect(yearMS, 'All years', () => refreshPreview()),
+    crop:     new MultiSelect(document.getElementById('filterCrop'),     'All crops',     () => refreshPreview()),
+    state:    new MultiSelect(document.getElementById('filterState'),    'All states',    async () => { await refreshDistricts(); refreshPreview(); }),
+    district: new MultiSelect(document.getElementById('filterDistrict'), 'All districts', () => refreshPreview()),
+  };
+
   const resetBtn = document.getElementById('resetFilters');
 
   const csvLink = document.getElementById('exportCsv');
@@ -14,7 +18,12 @@
   const pdfLink = document.getElementById('exportPdf');
 
   function currentFilters() {
-    return { year: yearSel.value, crop: cropSel.value, state: stateSel.value, district: districtSel.value };
+    return {
+      year:     filterMS.year.getValues().join(','),
+      crop:     filterMS.crop.getValues().join(','),
+      state:    filterMS.state.getValues().join(','),
+      district: filterMS.district.getValues().join(','),
+    };
   }
 
   function qs(params) {
@@ -28,12 +37,9 @@
   }
 
   async function refreshDistricts() {
-    const state = stateSel.value;
-    const list = await getJSON(`/api/districts?${qs({ state })}`);
-    const current = districtSel.value;
-    districtSel.innerHTML = '<option value="all">All districts</option>' +
-      list.map((d) => `<option value="${d}">${d}</option>`).join('');
-    if (list.includes(current)) districtSel.value = current;
+    const state = filterMS.state.getValues().join(',');
+    const list  = await getJSON(`/api/districts?${qs({ state })}`);
+    filterMS.district.setOptions(list);
   }
 
   async function refreshPreview() {
@@ -50,19 +56,12 @@
     pdfLink.href = `/reports/export/pdf?${query}`;
   }
 
-  yearSel.addEventListener('change', refreshPreview);
-  cropSel.addEventListener('change', refreshPreview);
-  districtSel.addEventListener('change', refreshPreview);
-  stateSel.addEventListener('change', async () => {
-    await refreshDistricts();
-    refreshPreview();
-  });
   resetBtn.addEventListener('click', async () => {
-    yearSel.value = 'all';
-    cropSel.value = 'all';
-    stateSel.value = 'all';
+    filterMS.year.clear();
+    filterMS.crop.clear();
+    filterMS.state.clear();
     await refreshDistricts();
-    districtSel.value = 'all';
+    filterMS.district.clear();
     refreshPreview();
   });
 

@@ -143,7 +143,7 @@ html.light-theme .card {
 html.light-theme .card:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 html.light-theme .skeleton {
@@ -272,7 +272,12 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius-md);
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
-.card:hover { border-color: var(--border-strong); background: var(--card-hover); }
+.card:hover {
+  border-color: var(--border-strong);
+  background: var(--card-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
+}
 
 .skeleton {
   background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 37%, rgba(255,255,255,0.04) 63%);
@@ -741,4 +746,68 @@ input:checked + .slider:before { transform: translateX(18px); }
 @keyframes toastFadeIn {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Premium UI/UX Interactions ---------- */
+
+/* Custom styled scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+html.light-theme ::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.18);
+  border-color: #EEF1F6;
+}
+html.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+/* Premium Input & Dropdown Focus Glows */
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="email"],
+select {
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+select:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+/* Native select custom dropdown indicators */
+select.settings-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  padding-right: 32px;
+}
+
+/* Prevent structural panels from translating on hover */
+.card.export-panel:hover,
+.card.compare-picker:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border) !important;
 }

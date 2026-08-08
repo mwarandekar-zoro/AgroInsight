@@ -2,29 +2,104 @@
    AgroInsight AI — Reports
    ========================================================= */
 
-.export-panel { padding: 26px; }
-.export-panel h3 { font-size: 16px; margin-bottom: 8px; }
-.export-sub { font-size: 13.5px; margin-bottom: 20px; max-width: 560px; }
+.export-panel {
+  padding: 28px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  margin-top: 24px;
+}
+.export-panel h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.export-sub {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  max-width: 600px;
+  line-height: 1.5;
+}
 
-.export-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.export-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .export-btn {
   flex: 1;
-  min-width: 180px;
+  min-width: 200px;
+  max-width: 280px;
+  display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 20px 16px;
-  text-align: center;
+  justify-content: center;
+  padding: 24px 20px;
+  border-radius: 16px;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-strong);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
-.export-icon { font-size: 22px; }
+
+/* CSV Card Hover */
+.export-btn#exportCsv:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(59, 130, 246, 0.01) 100%);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.3);
+}
+
+/* Excel Card Hover */
+.export-btn#exportExcel:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(34, 197, 94, 0.01) 100%);
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(34, 197, 94, 0.3);
+}
+
+/* PDF Card Hover */
+.export-btn#exportPdf:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0.01) 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(239, 68, 68, 0.3);
+}
+
+.export-icon {
+  font-size: 26px;
+  margin-bottom: 6px;
+  transition: transform 0.25s ease;
+}
+
+.export-btn:hover .export-icon {
+  transform: scale(1.15);
+}
+
+.export-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
 .export-tag {
   font-size: 11px;
-  color: var(--text-faint);
+  color: var(--text-muted);
   font-weight: 500;
-  text-transform: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.btn-primary .export-tag { color: rgba(6,23,13,0.65); }
 
 @media (max-width: 700px) {
-  .export-actions { flex-direction: column; }
+  .export-actions {
+    flex-direction: column;
+  }
+  .export-btn {
+    max-width: 100%;
+  }
 }
